@@ -1,97 +1,125 @@
-import { Injectable } from '@nestjs/common';
+import { Controller, Get, Query, BadRequestException } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as csv from 'csv-parser';
 
-interface PriceData {
-  timestamp: string;
+interface PricePoint {
+  timestamp: Date;
   price: number;
 }
 
-@Injectable()
-export class AppService {
-  async findBestTrade(start: string, end: string, funds: number) {
-    const filePath = path.join(__dirname, '..', '..', 'price_data.csv');
-    const data: PriceData[] = await this.loadCSV(filePath);
+@Controller()
+export class AppController {
+  private priceData: PricePoint[] = [];
 
-    // Convert timestamps to Date for comparison
-    const startTime = new Date(start);
-    const endTime = new Date(end);
-
-    if (startTime >= endTime) {
-      throw new Error('Start time must be before end time');
+  constructor() {
+    const csvFilePath = path.resolve(__dirname, '../../price_data.csv');
+    if (!fs.existsSync(csvFilePath)) {
+      throw new Error(`CSV file not found: ${csvFilePath}`);
     }
 
-    // Filter by range
-    const filtered = data
-      .filter((row) => {
-        const ts = new Date(row.timestamp);
-        return ts >= startTime && ts <= endTime;
+    fs.createReadStream(csvFilePath)
+      .pipe(csv())
+      .on('data', (row) => {
+        const timestamp = new Date(row.timestamp);
+        const price = parseFloat(row.price);
+        if (!isNaN(timestamp.getTime()) && !isNaN(price)) {
+          this.priceData.push({ timestamp, price });
+        }
       })
-      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+      .on('end', () => {
+        this.priceData.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+        console.log(`Loaded ${this.priceData.length} records from CSV`);
+      });
+  }
 
-    if (filtered.length < 2) {
-      throw new Error('Not enough data points in the given range');
+  @Get('best_trade')
+  getBestTrade(
+    @Query('start') startStr: string,
+    @Query('end') endStr: string,
+    @Query('funds') fundsStr?: string,
+  ) {
+    if (!startStr || !endStr) {
+      throw new BadRequestException('Start and end time are required.');
     }
 
-    let minPrice = filtered[0].price;
+    const start = new Date(startStr);
+    const end = new Date(endStr);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      throw new BadRequestException('Invalid date format.');
+    }
+
+    if (start >= end) {
+      throw new BadRequestException('Start time must be before end time.');
+    }
+
+    // Ensure the requested range is within the available data range
+    const firstTimestamp = this.priceData[0]?.timestamp;
+    const lastTimestamp = this.priceData[this.priceData.length - 1]?.timestamp;
+
+    if (!firstTimestamp || !lastTimestamp || start < firstTimestamp || end > lastTimestamp) {
+      throw new BadRequestException('Both time points should be within the query time slice.');
+    }
+
+    const subset = this.priceData.filter(p => p.timestamp >= start && p.timestamp <= end);
+    if (subset.length === 0) {
+      throw new BadRequestException('No data available in the selected time range.');
+    }
+
+    let minPrice = subset[0].price;
     let minIndex = 0;
     let maxProfit = 0;
     let bestBuy = 0;
     let bestSell = 0;
 
-    for (let i = 1; i < filtered.length; i++) {
-      const profit = filtered[i].price - minPrice;
+    for (let i = 1; i < subset.length; i++) {
+      const profit = subset[i].price - minPrice;
+
       if (profit > maxProfit) {
         maxProfit = profit;
         bestBuy = minIndex;
         bestSell = i;
       } else if (profit === maxProfit) {
-        if (i - minIndex < bestSell - bestBuy) {
+        const currentInterval = i - minIndex;
+        const bestInterval = bestSell - bestBuy;
+        if (currentInterval < bestInterval) {
           bestBuy = minIndex;
           bestSell = i;
         }
       }
 
-      if (filtered[i].price < minPrice) {
-        minPrice = filtered[i].price;
+      if (subset[i].price < minPrice) {
+        minPrice = subset[i].price;
         minIndex = i;
       }
     }
 
-    const buyPrice = filtered[bestBuy].price;
-    const sellPrice = filtered[bestSell].price;
-    const stocks = Math.floor(funds / buyPrice);
-    const profit = stocks * (sellPrice - buyPrice);
+    const buy = subset[bestBuy];
+    const sell = subset[bestSell];
 
-    return {
-      buy_time: filtered[bestBuy].timestamp,
-      sell_time: filtered[bestSell].timestamp,
-      buy_price: buyPrice,
-      sell_price: sellPrice,
-      stocks_bought: stocks,
-      profit: parseFloat(profit.toFixed(2)),
+    const response: any = {
+      buy_time: buy.timestamp.toISOString(),
+      sell_time: sell.timestamp.toISOString(),
+      buy_price: buy.price,
+      sell_price: sell.price,
     };
-  }
 
-  private loadCSV(filePath: string): Promise<PriceData[]> {
-    return new Promise((resolve, reject) => {
-      const results: PriceData[] = [];
+    // Optionally compute profit/stocks here, move to frontend instead
+    if (fundsStr) {
+      const funds = parseFloat(fundsStr);
+      if (isNaN(funds) || funds <= 0) {
+        throw new BadRequestException('Funds must be a positive number.');
+      }
 
-      fs.createReadStream(filePath)
-        .pipe(csv())
-        .on('data', (data: any) => {
-          results.push({
-            timestamp: data.timestamp,
-            price: parseFloat(data.price),
-          });
-        })
-        .on('end', () => {
-          resolve(results);
-        })
-        .on('error', (err) => {
-          reject(err);
-        });
-    });
+      /*
+      const stocks = Math.floor(funds / buy.price);
+      const profit = stocks * (sell.price - buy.price);
+      response.stocks_bought = stocks;
+      response.profit = parseFloat(profit.toFixed(2));
+      */
+    }
+
+    return response;
   }
 }
