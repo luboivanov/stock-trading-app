@@ -1,0 +1,11 @@
+cd c:\Projects\FullStackStockApp\backend
+npm run start:dev
+
+
+Testing:
+no buy/sell, flat prices - 2024-07-01T10:00:20Z to 2024-07-01T10:00:25Z
+no buy/sell, descending prices - 2024-07-01T10:00:26Z to 2024-07-01T10:00:29Z
+
+
+ToDo:
+python sccript to generate csv

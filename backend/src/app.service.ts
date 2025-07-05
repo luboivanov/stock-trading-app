@@ -2,100 +2,152 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import * as fs from 'fs';
 import * as csv from 'csv-parser';
 
+function isValidDate(date: Date | null): date is Date {
+  return date !== null && !isNaN(date.getTime());
+}
+
 @Injectable()
 export class AppService {
   async getBestTrade(start: string, end: string, funds?: string) {
-    const results: { timestamp: Date; price: number }[] = [];
+    try {
+      const pricePoints: { timestamp: Date; price: number }[] = [];
 
-    const filePath = 'price_data.csv';
-    if (!fs.existsSync(filePath)) {
-      throw new BadRequestException('CSV file not found');
-    }
+      const csvFilePath = '../price_data.csv';
+      if (!fs.existsSync(csvFilePath)) {
+        throw new BadRequestException('CSV file not found');
+      }
 
-    const fileData = fs
-      .createReadStream(filePath)
-      .pipe(csv({ headers: ['timestamp', 'price'] }))
-      .on('data', (row) => {
-        results.push({
-          timestamp: new Date(row.timestamp),
-          price: parseFloat(row.price),
+      // Read and parse CSV
+      const csvStream = fs
+        .createReadStream(csvFilePath)
+        .pipe(csv({ headers: ['timestamp', 'price'] }))
+        .on('data', (row) => {
+          const timestamp = new Date(row.timestamp);
+          const price = parseFloat(row.price);
+          if (isValidDate(timestamp) && !isNaN(price)) {
+            pricePoints.push({ timestamp, price });
+          } else {
+            console.warn('Skipping invalid CSV row:', row);
+          }
         });
+      
+      //read the CSV and await until it is fully read before proceeding (csv-parser stream works asynchronously)
+      await new Promise((resolve, reject) => {
+        csvStream.on('end', resolve);
+        csvStream.on('error', reject);
       });
 
-    await new Promise((resolve, reject) => {
-      fileData.on('end', resolve);
-      fileData.on('error', reject);
-    });
+      // Sort by timestamp ascending - ensure cases where the csv is not ordered itself
+      pricePoints.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 
-    results.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-
-    const parsedStart = new Date(start);
-    const parsedEnd = new Date(end);
-
-    const firstTimestamp = results[0]?.timestamp;
-    const lastTimestamp = results[results.length - 1]?.timestamp;
-
-    if (!firstTimestamp) {
-      throw new BadRequestException('CSV file is empty');
-    }
-
-    if (!parsedStart) {
-      throw new BadRequestException('Start time is invalid or missing.');
-    }
-    if (!parsedEnd) {
-      throw new BadRequestException('End time is invalid or missing.');
-    }
-    if (parsedStart < firstTimestamp) {
-      throw new BadRequestException('Start time is earlier than first CSV entry.');
-    }
-    if (parsedEnd > lastTimestamp) {
-      throw new BadRequestException('End time is later than last CSV entry.');
-    }
-
-    const filtered = results.filter(
-      (entry) =>
-        entry.timestamp.getTime() >= parsedStart.getTime() &&
-        entry.timestamp.getTime() <= parsedEnd.getTime(),
-    );
-
-    if (filtered.length === 0) {
-      throw new BadRequestException('No data points in the given range.');
-    }
-
-    let maxProfit = 0;
-    let buyTime: Date | null = null;
-    let sellTime: Date | null = null;
-    let minPrice = filtered[0].price;
-    let minPriceTime = filtered[0].timestamp;
-
-    for (const entry of filtered) {
-      if (entry.price < minPrice) {
-        minPrice = entry.price;
-        minPriceTime = entry.timestamp;
+      if (pricePoints.length === 0) {
+        throw new BadRequestException('CSV file contains no valid entries.');
       }
 
-      const profit = entry.price - minPrice;
-      if (profit > maxProfit) {
-        maxProfit = profit;
-        buyTime = minPriceTime;
-        sellTime = entry.timestamp;
+      const startTimeFromApi = new Date(start);
+      const endTimeFromApi = new Date(end);
+      const csvStartTime = pricePoints[0].timestamp;
+      const csvEndTime = pricePoints[pricePoints.length - 1].timestamp;
+
+      if (!isValidDate(startTimeFromApi)) {
+        throw new BadRequestException('Invalid start time provided.');
       }
+      if (!isValidDate(endTimeFromApi)) {
+        throw new BadRequestException('Invalid end time provided.');
+      }
+      if (startTimeFromApi < csvStartTime) {
+        throw new BadRequestException(
+          `Start time in the request (${startTimeFromApi.toISOString()}) is earlier than the first CSV entry (${csvStartTime.toISOString()}).`,
+        );
+      }
+      if (endTimeFromApi > csvEndTime) {
+        throw new BadRequestException(
+          `End time in the request (${endTimeFromApi.toISOString()}) is later than the last CSV entry (${csvEndTime.toISOString()}).`,
+        );
+      }
+      if (endTimeFromApi < startTimeFromApi) {
+        throw new BadRequestException('End time is before start time.');
+      }
+
+      //console.log('Start time from API:', startTimeFromApi.toISOString());
+      //console.log('Start time from CSV:', csvStartTime.toISOString());
+
+      // Filter the price data in the selected window
+      const relevantPrices = pricePoints.filter(
+        (entry) =>
+          entry.timestamp.getTime() >= startTimeFromApi.getTime() &&
+          entry.timestamp.getTime() <= endTimeFromApi.getTime(),
+      );
+
+      if (relevantPrices.length === 0) {
+        throw new BadRequestException('No data points found in the given time range.');
+      }
+
+      //Let's do the business - Calculate best buy-sell times
+      let maxProfit = 0;
+      let bestBuyTime: Date | null = null;
+      let bestSellTime: Date | null = null;
+      let bestBuyPrice = 0;
+      let bestSellPrice = 0;
+
+      let lowestPrice = relevantPrices[0].price;
+      let lowestPriceTime = relevantPrices[0].timestamp;
+
+      for (const entry of relevantPrices) {
+        const potentialProfit = entry.price - lowestPrice;
+
+        if (potentialProfit > 0) {
+          const currentBuyTime = lowestPriceTime;
+          const currentSellTime = entry.timestamp;
+          const currentDuration = currentSellTime.getTime() - currentBuyTime.getTime();
+
+          let shouldUpdate = false;
+
+          if (potentialProfit > maxProfit) {
+            shouldUpdate = true;
+          } else if (potentialProfit === maxProfit) {
+            const previousDuration = bestSellTime && bestBuyTime ? bestSellTime.getTime() - bestBuyTime.getTime(): Infinity;
+
+            if (currentDuration < previousDuration) {
+              shouldUpdate = true;
+            } 
+          }
+
+          if (shouldUpdate) {
+            maxProfit = potentialProfit;
+            bestBuyTime = new Date(currentBuyTime);
+            bestSellTime = new Date(currentSellTime);
+            bestBuyPrice = lowestPrice;
+            bestSellPrice = entry.price;
+          }
+        }
+        //
+        if (entry.price < lowestPrice) {
+          lowestPrice = entry.price;
+          lowestPriceTime = entry.timestamp;
+        }
+      }
+
+      //build response
+      type TradeResponse = {
+        buyTime: string | null;
+        sellTime: string | null;
+        buyPrice?: number;
+        sellPrice?: number;
+      };
+
+      const tradeResponse: TradeResponse = {
+        buyTime: isValidDate(bestBuyTime) ? bestBuyTime.toISOString() : null,
+        sellTime: isValidDate(bestSellTime) ? bestSellTime.toISOString() : null,
+        buyPrice: bestBuyPrice ?? undefined,
+        sellPrice: bestSellPrice ?? undefined,
+      };
+
+      console.log('Trade Response:', tradeResponse);
+      return tradeResponse;
+    } catch (error) {
+      console.error('Error in getBestTrade():', error);
+      throw error;
     }
-
-    const response: any = {
-      buy: buyTime,
-      sell: sellTime,
-    };
-
-    // Funds logic is moved to frontend; this is just optional for testing
-    if (funds && buyTime && sellTime) {
-      const buyPrice = filtered.find((x) => x.timestamp.getTime() === buyTime.getTime())?.price ?? 0;
-      const sellPrice = filtered.find((x) => x.timestamp.getTime() === sellTime.getTime())?.price ?? 0;
-      const shares = parseFloat(funds) / buyPrice;
-      response.shares = shares;
-      response.profit = shares * (sellPrice - buyPrice);
-    }
-
-    return response;
   }
 }
