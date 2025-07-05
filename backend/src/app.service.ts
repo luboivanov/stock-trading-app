@@ -6,6 +6,12 @@ function isValidDate(date: Date | null): date is Date {
   return date !== null && !isNaN(date.getTime());
 }
 
+function parseIsoToUtc(dateStr: string): Date {
+  return dateStr.match(/(Z|[+\-]\d{2}:\d{2})$/)
+    ? new Date(dateStr)
+    : new Date(dateStr + 'Z');
+}
+
 @Injectable()
 export class AppService {
   async getBestTrade(start: string, end: string, funds?: string) {
@@ -44,8 +50,8 @@ export class AppService {
         throw new BadRequestException('CSV file contains no valid entries.');
       }
 
-      const startTimeFromApi = new Date(start);
-      const endTimeFromApi = new Date(end);
+      const startTimeFromApi = parseIsoToUtc(start);
+      const endTimeFromApi   = parseIsoToUtc(end);
       const csvStartTime = pricePoints[0].timestamp;
       const csvEndTime = pricePoints[pricePoints.length - 1].timestamp;
 
