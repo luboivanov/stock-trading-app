@@ -43,8 +43,9 @@ const App: React.FC = () => {
 
     try {
       const response = await fetch(
-        `/best-trade?start=${encodeURIComponent(startTime.toISOString())}&end=${encodeURIComponent(endTime.toISOString())}`
+        `http://localhost:8000/api/v1/best-trade?start=${encodeURIComponent(startTime.toISOString())}&end=${encodeURIComponent(endTime.toISOString())}`
       );
+
       if (!response.ok) {
         const errMsg = await response.text();
         throw new Error(errMsg || 'Failed to get data');
