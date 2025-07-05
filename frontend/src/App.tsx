@@ -19,7 +19,7 @@ const App: React.FC = () => {
     buyPrice: number;
     sellPrice: number;
     stocksBought: number;
-    profit: number;
+    profit: number | null;
   } | null>(null);
   const [error, setError] = useState('');
 
@@ -59,12 +59,19 @@ const App: React.FC = () => {
       }
 
       const stocksBought = Math.floor(fundsNum / data.buyPrice);
+      let profit = null;
       if (stocksBought === 0) {
-        setError('Insufficient funds to buy any stocks at the buy price.');
+        setResult({
+          buyTime: data.buyTime,
+          sellTime: data.sellTime,
+          buyPrice: data.buyPrice,
+          sellPrice: data.sellPrice,
+          stocksBought: 0,
+          profit: null,
+        });
         return;
       }
-      const profit = stocksBought * (data.sellPrice - data.buyPrice);
-
+      profit = stocksBought * (data.sellPrice - data.buyPrice);
       setResult({
         buyTime: data.buyTime,
         sellTime: data.sellTime,
@@ -88,77 +95,151 @@ const App: React.FC = () => {
 
   return (
     <div style={{ maxWidth: 600, margin: 'auto', padding: 20, fontFamily: 'Arial, sans-serif' }}>
-      <h1>Stock Trading Profit Finder</h1>
-      <p style={{ color: '#555', fontSize: 13, marginBottom: 20 }}>
-        All times are in <strong>UTC</strong>.
-      </p>
-      <label>
-        Start Time:
-        <DatePicker
-          selected={startTimeStr ? utcStringToLocalDate(startTimeStr) : null}
-          onChange={date => {
-            if (date) {
-              // Use local time components to build a UTC ISO string
-              const year = date.getFullYear();
-              const month = date.getMonth();
-              const day = date.getDate();
-              const hour = date.getHours();
-              const minute = date.getMinutes();
-              const second = date.getSeconds();
-              const isoString = `${year.toString().padStart(4, '0')}-${(month+1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}Z`;
-              setStartTimeStr(isoString);
-            } else {
-              setStartTimeStr(null);
-            }
+      <h1 style={{ textAlign: 'center' }}>Stock Trading Profit Finder</h1>
+
+      <form
+        style={{
+          background: '#f9f9f9', // match result card
+          border: '1px solid #ccc', // match result card
+          borderRadius: 5, // match result card
+          padding: 24,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 18,
+          marginBottom: 24,
+        }}
+        onSubmit={e => { e.preventDefault(); handleQuery(); }}
+      >
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 0 }}>
+          <tbody>
+            <tr style={{ height: 33 }}>
+              <td style={{ minWidth: 160, width: 180, fontWeight: 500, textAlign: 'right', padding: '0 16px 0 0', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>Start Time (UTC):</td>
+              <td style={{ width: '100%' }}>
+                <DatePicker
+                  selected={startTimeStr ? utcStringToLocalDate(startTimeStr) : null}
+                  onChange={date => {
+                    if (date) {
+                      const year = date.getFullYear();
+                      const month = date.getMonth();
+                      const day = date.getDate();
+                      const hour = date.getHours();
+                      const minute = date.getMinutes();
+                      const second = date.getSeconds();
+                      const isoString = `${year.toString().padStart(4, '0')}-${(month+1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}Z`;
+                      setStartTimeStr(isoString);
+                    } else {
+                      setStartTimeStr(null);
+                    }
+                  }}
+                  showTimeSelect
+                  timeFormat="HH:mm:ss"
+                  timeIntervals={1}
+                  dateFormat="yyyy-MM-dd HH:mm:ss 'UTC'"
+                  placeholderText="Select start time (UTC)"
+                  popperPlacement="bottom"
+                />
+              </td>
+            </tr>
+            <tr style={{ height: 33 }}>
+              <td style={{ minWidth: 160, width: 180, fontWeight: 500, textAlign: 'right', padding: '0 16px 0 0', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>End Time (UTC):</td>
+              <td style={{ width: '100%' }}>
+                <DatePicker
+                  selected={endTimeStr ? utcStringToLocalDate(endTimeStr) : null}
+                  onChange={date => {
+                    if (date) {
+                      const year = date.getFullYear();
+                      const month = date.getMonth();
+                      const day = date.getDate();
+                      const hour = date.getHours();
+                      const minute = date.getMinutes();
+                      const second = date.getSeconds();
+                      const isoString = `${year.toString().padStart(4, '0')}-${(month+1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}Z`;
+                      setEndTimeStr(isoString);
+                    } else {
+                      setEndTimeStr(null);
+                    }
+                  }}
+                  showTimeSelect
+                  timeFormat="HH:mm:ss"
+                  timeIntervals={1}
+                  dateFormat="yyyy-MM-dd HH:mm:ss 'UTC'"
+                  placeholderText="Select end time (UTC)"
+                  minDate={startTimeStr ? utcStringToLocalDate(startTimeStr) : undefined}
+                  popperPlacement="bottom"
+                />
+              </td>
+            </tr>
+            <tr style={{ height: 33 }}>
+              <td style={{ minWidth: 160, width: 180, fontWeight: 500, textAlign: 'right', padding: '0 16px 0 0', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>Available Funds:</td>
+              <td style={{ width: '100%' }}>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={funds}
+                  onChange={e => setFunds(e.target.value)}
+                  placeholder="e.g. 1000"
+                  style={{
+                    width: 170,
+                    height: 22,
+                    padding: '0 36px 0 10px',
+                    borderRadius: 0,
+                    border: '1px solid black',
+                    fontSize: 14, // 1px smaller than before
+                    boxSizing: 'border-box',
+                    display: 'block',
+                    marginTop: 0,
+                    marginBottom: 0,
+                  }}
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <button
+          type="submit"
+          style={{
+            marginTop: 10,
+            padding: '10px 0',
+            borderRadius: 6,
+            border: 'none',
+            background: 'linear-gradient(90deg, #6366f1 0%, #60a5fa 100%)',
+            color: '#fff',
+            fontWeight: 600,
+            fontSize: 17,
+            cursor: 'pointer',
+            boxShadow: '0 1px 4px rgba(99,102,241,0.08)'
           }}
-          showTimeSelect
-          timeFormat="HH:mm:ss"
-          timeIntervals={1}
-          dateFormat="yyyy-MM-dd HH:mm:ss 'UTC'"
-          placeholderText="Select start time (UTC)"
-        />
-      </label>
-      <label style={{ display: 'block', marginTop: 10 }}>
-        End Time:
-        <DatePicker
-          selected={endTimeStr ? utcStringToLocalDate(endTimeStr) : null}
-          onChange={date => {
-            if (date) {
-              const year = date.getFullYear();
-              const month = date.getMonth();
-              const day = date.getDate();
-              const hour = date.getHours();
-              const minute = date.getMinutes();
-              const second = date.getSeconds();
-              const isoString = `${year.toString().padStart(4, '0')}-${(month+1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}Z`;
-              setEndTimeStr(isoString);
-            } else {
-              setEndTimeStr(null);
-            }
+        >
+          Find Optimal Trade
+        </button>
+      </form>
+      {error && (
+        <div
+          style={{
+            color: '#222', // Match label color
+            background: '#f3f4f6',
+            border: '1px solid #ff5858',
+            borderRadius: 6,
+            padding: '16px 20px',
+            marginTop: 24,
+            fontWeight: 500,
+            fontSize: 16,
+            fontFamily: 'Arial, sans-serif', // Match label font
+            boxShadow: '0 2px 8px rgba(255,88,88,0.08)'
           }}
-          showTimeSelect
-          timeFormat="HH:mm:ss"
-          timeIntervals={1}
-          dateFormat="yyyy-MM-dd HH:mm:ss 'UTC'"
-          placeholderText="Select end time (UTC)"
-          minDate={startTimeStr ? utcStringToLocalDate(startTimeStr) : undefined}
-        />
-      </label>
-      <label style={{ display: 'block', marginTop: 10 }}>
-        Available Funds:
-        <input
-          type="number"
-          min="0"
-          step="0.01"
-          value={funds}
-          onChange={e => setFunds(e.target.value)}
-          placeholder="e.g. 1000"
-        />
-      </label>
-      <button style={{ marginTop: 20 }} onClick={handleQuery}>
-        Find Optimal Trade
-      </button>
-      {error && <p style={{ color: 'red', marginTop: 20 }}>{error}</p>}
+        >
+          <span style={{ marginRight: 8, fontSize: 20, verticalAlign: 'middle' }}>⚠️</span>
+          {(() => {
+            try {
+              const parsed = JSON.parse(error);
+              if (parsed && parsed.message) return parsed.message;
+            } catch {}
+            return error;
+          })()}
+        </div>
+      )}
       {result && (
         <div
           style={{
@@ -169,19 +250,25 @@ const App: React.FC = () => {
             backgroundColor: '#f9f9f9',
           }}
         >
-          <h2>Result:</h2>
+          <h2>Recommended Action:</h2>
           <p>
             Buy Time: <strong>{new Date(result.buyTime).toLocaleString('en-US', { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' })}</strong> at price <strong>${result.buyPrice.toFixed(2)}</strong>
           </p>
           <p>
             Sell Time: <strong>{new Date(result.sellTime).toLocaleString('en-US', { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' })}</strong> at price <strong>${result.sellPrice.toFixed(2)}</strong>
           </p>
-          <p>
-            Stocks Bought: <strong>{result.stocksBought}</strong>
-          </p>
-          <p>
-            Profit: <strong>${result.profit.toFixed(2)}</strong>
-          </p>
+          {result.stocksBought === 0 ? (
+            <p style={{ color: '#b91c1c', fontWeight: 500, marginTop: 12 }}>Insufficient funds to buy any stocks at the buy price.</p>
+          ) : (
+            <>
+              <p>
+                Stocks You can Buy: <strong>{result.stocksBought}</strong>
+              </p>
+              <p>
+                Potential Profit: <strong>${result.profit?.toFixed(2) || 0}</strong>
+              </p>
+            </>
+          )}
         </div>
       )}
     </div>
