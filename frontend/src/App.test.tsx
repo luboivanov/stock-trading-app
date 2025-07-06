@@ -1,7 +1,38 @@
+/**
+ * @jest-environment jsdom
+ */
+
+// Mock react-datepicker to a simple input for test reliability
+jest.mock('react-datepicker', () => {
+  // eslint-disable-next-line react/display-name
+  return ({ selected, onChange, ...props }: any) => {
+    // Format value as 'YYYY-MM-DDTHH:mm:ss' for datetime-local
+    let value = '';
+    if (selected instanceof Date && !isNaN(selected.getTime())) {
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      value = `${selected.getFullYear()}-${pad(selected.getMonth() + 1)}-${pad(selected.getDate())}T${pad(selected.getHours())}:${pad(selected.getMinutes())}:${pad(selected.getSeconds())}`;
+    }
+    return (
+      <input
+        type="datetime-local"
+        value={value}
+        aria-label={props.placeholderText}
+        onChange={e => {
+          // Always parse as UTC by appending 'Z'
+          let v = e.target.value;
+          if (v && v.length === 16) v += ':00';
+          const date = v ? new Date(v + 'Z') : null;
+          onChange(date);
+        }}
+        {...props}
+      />
+    );
+  };
+});
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { within } from '@testing-library/react';
 import App from './App';
 
 // Mock fetch globally
@@ -36,26 +67,16 @@ describe('App', () => {
     }
   });
 
-  // Helper to pick a date from react-datepicker calendar
-  async function pickDate(label: string, date: Date) {
-    const input = screen.getByPlaceholderText(label);
-    await userEvent.click(input);
-    // Wait for calendar popup
-    const calendar = await screen.findByRole('dialog', { name: /calendar/i });
-    // Find the day button by visible text, matching the correct month/year
-    const day = date.getDate().toString();
-    // Find the month and year label
-    const monthYearLabel = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    // Ensure the calendar is showing the correct month/year
-    await waitFor(() => {
-      expect(within(calendar).getByText(monthYearLabel)).toBeInTheDocument();
-    });
-    // Find all day buttons with the correct text
-    const dayButtons = within(calendar).getAllByRole('button', { name: new RegExp(`^${day}$`) });
-    // Pick the one that is not disabled and is visible
-    const validDayButton = dayButtons.find(btn => !btn.hasAttribute('disabled') && btn.offsetParent !== null);
-    if (!validDayButton) throw new Error('Valid day button not found');
-    await userEvent.click(validDayButton);
+  // Helper to set a date value directly in the input using userEvent
+  async function setDateInput(label: string, value: string) {
+    // Always type full datetime with seconds
+    let v = value;
+    if (v.length === 16) v += ':00';
+    const input = screen.getByLabelText(label);
+    await userEvent.clear(input);
+    await userEvent.type(input, v);
+    // Fire change event to ensure mock's onChange is triggered
+    fireEvent.change(input, { target: { value: v } });
   }
 
   it('renders form fields and button', () => {
@@ -76,40 +97,42 @@ describe('App', () => {
 
   it('shows error if funds is not positive', async () => {
     render(<App />);
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText('Select start time (UTC)')).toBeInTheDocument();
-    });
-    await pickDate('Select start time (UTC)', new Date('2025-07-05T00:00:00Z'));
-    await pickDate('Select end time (UTC)', new Date('2025-07-05T01:00:00Z'));
-    await waitFor(() => {
-      expect(screen.queryByText(/Please specify both start and end times/i)).not.toBeInTheDocument();
-    });
-    fireEvent.change(screen.getByPlaceholderText(/e.g. 1000/i), { target: { value: '-5' } });
+    // Fill required fields
+    await setDateInput('Select start time (UTC)', '2025-07-05T00:00:00');
+    await setDateInput('Select end time (UTC)', '2025-07-05T01:00:01');
+    const fundsInput = screen.getByPlaceholderText(/e.g. 1000/i);
+    await userEvent.clear(fundsInput);
+    await userEvent.type(fundsInput, '-100');
+    // Submit the form to trigger validation
     fireEvent.click(screen.getByRole('button', { name: /Find Optimal Trade/i }));
-    expect(await screen.findByText(/Available funds must be a positive number/i)).toBeInTheDocument();
+    // Match the exact error message
+    const errorDiv = await screen.findByText(/Available funds must be a positive number\./i);
+    expect(errorDiv).toBeInTheDocument();
   });
 
   it('shows error if start time is after end time', async () => {
     render(<App />);
-    await pickDate('Select start time (UTC)', new Date('2025-07-05T01:00:00Z'));
-    await pickDate('Select end time (UTC)', new Date('2025-07-05T00:00:00Z'));
-    await waitFor(() => {
-      expect(screen.queryByText(/Please specify both start and end times/i)).not.toBeInTheDocument();
-    });
-    fireEvent.change(screen.getByPlaceholderText(/e.g. 1000/i), { target: { value: '100' } });
+    // Fill required fields with valid funds
+    await setDateInput('Select start time (UTC)', '2025-07-05T01:00:01');
+    await setDateInput('Select end time (UTC)', '2025-07-05T00:00:00');
+    const fundsInput = screen.getByPlaceholderText(/e.g. 1000/i);
+    await userEvent.clear(fundsInput);
+    await userEvent.type(fundsInput, '100');
+    // Submit the form to trigger validation
     fireEvent.click(screen.getByRole('button', { name: /Find Optimal Trade/i }));
-    expect(await screen.findByText(/Start time must be before end time/i)).toBeInTheDocument();
+    // Match the exact error message
+    const errorMsg = await screen.findByText(/Start time must be before end time\./i);
+    expect(errorMsg).toBeInTheDocument();
   });
 
   it('shows error if API returns error', async () => {
     mockFetch.mockResolvedValueOnce({ ok: false, text: async () => 'API error' });
     render(<App />);
-    await pickDate('Select start time (UTC)', new Date('2025-07-05T00:00:00Z'));
-    await pickDate('Select end time (UTC)', new Date('2025-07-05T01:00:00Z'));
-    await waitFor(() => {
-      expect(screen.queryByText(/Please specify both start and end times/i)).not.toBeInTheDocument();
-    });
-    fireEvent.change(screen.getByPlaceholderText(/e.g. 1000/i), { target: { value: '100' } });
+    await setDateInput('Select start time (UTC)', '2025-07-05T00:00:00');
+    await setDateInput('Select end time (UTC)', '2025-07-05T01:00:00');
+    const fundsInput = screen.getByPlaceholderText(/e.g. 1000/i);
+    await userEvent.clear(fundsInput);
+    await userEvent.type(fundsInput, '100');
     fireEvent.click(screen.getByRole('button', { name: /Find Optimal Trade/i }));
     expect(await screen.findByText(/API error/i)).toBeInTheDocument();
   });
@@ -125,16 +148,14 @@ describe('App', () => {
       }),
     });
     render(<App />);
-    await pickDate('Select start time (UTC)', new Date('2025-07-05T00:00:00Z'));
-    await pickDate('Select end time (UTC)', new Date('2025-07-05T00:00:02Z'));
-    await waitFor(() => {
-      expect(screen.queryByText(/Please specify both start and end times/i)).not.toBeInTheDocument();
-    });
-    fireEvent.change(screen.getByPlaceholderText(/e.g. 1000/i), { target: { value: '250' } });
+    await setDateInput('Select start time (UTC)', '2025-07-05T00:00:00');
+    await setDateInput('Select end time (UTC)', '2025-07-05T00:00:02');
+    const fundsInput = screen.getByPlaceholderText(/e.g. 1000/i);
+    await userEvent.clear(fundsInput);
+    await userEvent.type(fundsInput, '250');
     fireEvent.click(screen.getByRole('button', { name: /Find Optimal Trade/i }));
-    await waitFor(() => {
-      expect(screen.getByText(/Buy Time/i)).toBeInTheDocument();
-    });
+    // Wait for result fields
+    await screen.findByText(/Buy Time/i);
     expect(screen.getByText(/Sell Time/i)).toBeInTheDocument();
     expect(screen.getByText(/Stocks You can Buy/i)).toBeInTheDocument();
     expect(screen.getByText(/Potential Profit/i)).toBeInTheDocument();
@@ -151,12 +172,14 @@ describe('App', () => {
       }),
     });
     render(<App />);
-    await pickDate('Select start time (UTC)', new Date('2025-07-05T00:00:00Z'));
-    await pickDate('Select end time (UTC)', new Date('2025-07-05T00:00:02Z'));
+    await setDateInput('Select start time (UTC)', '2025-07-05T00:00:00');
+    await setDateInput('Select end time (UTC)', '2025-07-05T00:00:02');
     await waitFor(() => {
       expect(screen.queryByText(/Please specify both start and end times/i)).not.toBeInTheDocument();
     });
-    fireEvent.change(screen.getByPlaceholderText(/e.g. 1000/i), { target: { value: '250' } });
+    const fundsInput = screen.getByPlaceholderText(/e.g. 1000/i);
+    await userEvent.clear(fundsInput);
+    await userEvent.type(fundsInput, '250');
     fireEvent.click(screen.getByLabelText(/Allow fractional shares/i));
     fireEvent.click(screen.getByRole('button', { name: /Find Optimal Trade/i }));
     await waitFor(() => {
@@ -176,12 +199,14 @@ describe('App', () => {
       }),
     });
     render(<App />);
-    await pickDate('Select start time (UTC)', new Date('2025-07-05T00:00:00Z'));
-    await pickDate('Select end time (UTC)', new Date('2025-07-05T00:00:02Z'));
+    await setDateInput('Select start time (UTC)', '2025-07-05T00:00:00');
+    await setDateInput('Select end time (UTC)', '2025-07-05T00:00:02');
     await waitFor(() => {
       expect(screen.queryByText(/Please specify both start and end times/i)).not.toBeInTheDocument();
     });
-    fireEvent.change(screen.getByPlaceholderText(/e.g. 1000/i), { target: { value: '5' } });
+    const fundsInput = screen.getByPlaceholderText(/e.g. 1000/i);
+    await userEvent.clear(fundsInput);
+    await userEvent.type(fundsInput, '5');
     fireEvent.click(screen.getByRole('button', { name: /Find Optimal Trade/i }));
     await waitFor(() => {
       expect(screen.getByText(/Insufficient funds to buy any stocks/i)).toBeInTheDocument();

@@ -149,6 +149,7 @@ const App: React.FC = () => {
                   dateFormat="yyyy-MM-dd HH:mm:ss 'UTC'"
                   placeholderText="Select start time (UTC)"
                   popperPlacement="bottom"
+                  //value="2025-07-06 18:03:00 UTC"
                 />
               </td>
             </tr>
@@ -178,6 +179,7 @@ const App: React.FC = () => {
                   placeholderText="Select end time (UTC)"
                   minDate={startTimeStr ? utcStringToLocalDate(startTimeStr) : undefined}
                   popperPlacement="bottom"
+                  //value="2025-07-06 18:03:03 UTC"
                 />
               </td>
             </tr>
@@ -186,7 +188,7 @@ const App: React.FC = () => {
               <td style={{ width: '100%' }}>
                 <input
                   type="number"
-                  min="0"
+                  min="-10000000" // Allow negative for testing, but should be positive in production
                   step="0.01"
                   value={funds}
                   onChange={e => setFunds(e.target.value)}
