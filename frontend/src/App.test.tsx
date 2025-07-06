@@ -126,6 +126,7 @@ describe('App', () => {
   });
 
   it('shows error if API returns error', async () => {
+    //simulate failed API call
     mockFetch.mockResolvedValueOnce({ ok: false, text: async () => 'API error' });
     render(<App />);
     await setDateInput('Select start time (UTC)', '2025-07-05T00:00:00');
@@ -135,6 +136,33 @@ describe('App', () => {
     await userEvent.type(fundsInput, '100');
     fireEvent.click(screen.getByRole('button', { name: /Find Optimal Trade/i }));
     expect(await screen.findByText(/API error/i)).toBeInTheDocument();
+  });
+
+
+  it('shows raw error if error is invalid JSON', async () => {
+    // Simulate an invalid JSON error string
+    mockFetch.mockResolvedValueOnce({ ok: false, text: async () => '{not valid json}' });
+    render(<App />);
+    await setDateInput('Select start time (UTC)', '2025-07-05T00:00:00');
+    await setDateInput('Select end time (UTC)', '2025-07-05T01:00:00');
+    const fundsInput = screen.getByPlaceholderText(/e.g. 1000/i);
+    await userEvent.clear(fundsInput);
+    await userEvent.type(fundsInput, '100');
+    fireEvent.click(screen.getByRole('button', { name: /Find Optimal Trade/i }));
+    expect(await screen.findByText(/{not valid json}/i)).toBeInTheDocument();
+  });
+
+  it('shows error message from JSON error with message property', async () => {
+    // Simulate a JSON error string with a message property
+    mockFetch.mockResolvedValueOnce({ ok: false, text: async () => JSON.stringify({ message: 'API exploded' }) });
+    render(<App />);
+    await setDateInput('Select start time (UTC)', '2025-07-05T00:00:00');
+    await setDateInput('Select end time (UTC)', '2025-07-05T01:00:00');
+    const fundsInput = screen.getByPlaceholderText(/e.g. 1000/i);
+    await userEvent.clear(fundsInput);
+    await userEvent.type(fundsInput, '100');
+    fireEvent.click(screen.getByRole('button', { name: /Find Optimal Trade/i }));
+    expect(await screen.findByText(/API exploded/i)).toBeInTheDocument();
   });
 
   it('shows result for valid API response (integer shares)', async () => {
@@ -211,5 +239,25 @@ describe('App', () => {
     await waitFor(() => {
       expect(screen.getByText(/Insufficient funds to buy any stocks/i)).toBeInTheDocument();
     });
+  });
+
+  it('shows no good deal if API returns null values', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        buyTime: null, // Simulate missing buyTime
+        sellTime: null, // Simulate missing sellTime
+        buyPrice: null, // Simulate missing buyPrice   
+        sellPrice: null, // Simulate missing sellPrice
+      }),
+    });
+    render(<App />);
+    await setDateInput('Select start time (UTC)', '2025-07-05T00:00:00');
+    await setDateInput('Select end time (UTC)', '2025-07-05T00:00:02');
+    const fundsInput = screen.getByPlaceholderText(/e.g. 1000/i);
+    await userEvent.clear(fundsInput);
+    await userEvent.type(fundsInput, '100');
+    fireEvent.click(screen.getByRole('button', { name: /Find Optimal Trade/i }));
+    expect(await screen.findByText(/No profitable trade found for the given time period\./i)).toBeInTheDocument();
   });
 });
