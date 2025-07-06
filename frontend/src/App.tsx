@@ -9,10 +9,12 @@ interface ApiResponse {
   sellPrice: number | null;
 }
 
+
 const App: React.FC = () => {
   const [startTimeStr, setStartTimeStr] = useState<string | null>(null);
   const [endTimeStr, setEndTimeStr] = useState<string | null>(null);
   const [funds, setFunds] = useState('');
+  const [fractional, setFractional] = useState(false);
   const [result, setResult] = useState<{
     buyTime: string;
     sellTime: string;
@@ -23,6 +25,13 @@ const App: React.FC = () => {
   } | null>(null);
   const [error, setError] = useState('');
 
+
+  //async function to handle the query and wait for the response
+  //fetches data from the backend API and processes the response
+  //validates inputs and handles errors
+  //calculates the optimal trade based on the provided time range and available funds
+  //uses UTC strings for API requests to ensure consistent time handling
+  //calculates the number of stocks that can be bought based on the available funds and buy price
   const handleQuery = async () => {
     setError('');
     setResult(null);
@@ -58,7 +67,9 @@ const App: React.FC = () => {
         return;
       }
 
-      const stocksBought = Math.floor(fundsNum / data.buyPrice);
+      const stocksBought = fractional
+        ? Math.floor((fundsNum / data.buyPrice) * 100) / 100 // round down to 2 decimals
+        : Math.floor(fundsNum / data.buyPrice);
       let profit = null;
       if (stocksBought === 0) {
         setResult({
@@ -109,7 +120,7 @@ const App: React.FC = () => {
           gap: 18,
           marginBottom: 24,
         }}
-        onSubmit={e => { e.preventDefault(); handleQuery(); }}
+        onSubmit={e => { e.preventDefault(); handleQuery(); }} //prevent default form submission, no reload
       >
         <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 0 }}>
           <tbody>
@@ -195,6 +206,20 @@ const App: React.FC = () => {
                 />
               </td>
             </tr>
+            <tr style={{ height: 33 }}>
+              <td style={{ minWidth: 160, width: 180, fontWeight: 500, textAlign: 'right', padding: '0 16px 0 0', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>Allow fractional shares:</td>
+              <td style={{ width: '100%' }}>
+                <label style={{ cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={fractional}
+                    onChange={e => setFractional(e.target.checked)}
+                    style={{ marginRight: 6, verticalAlign: 'middle' }}
+                  />
+                  Allow fractional shares
+                </label>
+              </td>
+            </tr>
           </tbody>
         </table>
         <button
@@ -262,7 +287,7 @@ const App: React.FC = () => {
           ) : (
             <>
               <p>
-                Stocks You can Buy: <strong>{result.stocksBought}</strong>
+                Stocks You can Buy: <strong>{fractional ? result.stocksBought.toFixed(2) : result.stocksBought}</strong>
               </p>
               <p>
                 Potential Profit: <strong>${result.profit?.toFixed(2) || 0}</strong>
