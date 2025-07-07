@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
+  app.setGlobalPrefix('api'); // Add global API prefix so /api/health works
 
   // (Optional) Swagger setup
   const config = new DocumentBuilder()

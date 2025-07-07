@@ -5,6 +5,8 @@ Backend
 	Swagger: http://localhost:8000/api#/App/AppController_getBestTrade
 
 Frontend
+	c:\Projects\FullStackStockApp\frontend
+	npm start
 	http://localhost:3001/
 
 Github
@@ -54,9 +56,10 @@ ToDo:
 
 Production ready:
 	reverse proxy via NGINX or Traefik.
-	Host on a provider like Render, DigitalOcean, AWS, Vercel, etc.
+	//Host on a provider like Render, DigitalOcean, AWS, Vercel, etc.
 	CI/CD - Set up GitHub Actions / GitLab CI / CircleCI:
 	HTTPS
+	//Environment variables REACT_APP_API_URL
 
 	open api, stub
 	xsrf
