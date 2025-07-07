@@ -8,7 +8,7 @@ interface ApiResponse {
   buyPrice: number | null;
   sellPrice: number | null;
 }
-//temp comment to push github actions workflow for e2e - test try 5
+//temp comment to push github actions workflow for e2e - test try 6
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
 const App: React.FC = () => {
