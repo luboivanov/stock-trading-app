@@ -1,45 +1,46 @@
-name: Cypress E2E Tests
+name: E2E Tests
 
 on:
   push:
     paths:
       - 'frontend/**'
       - 'backend/**'
-      - '.github/workflows/e2e-tests.yml'
   pull_request:
     paths:
       - 'frontend/**'
       - 'backend/**'
 
 jobs:
-  cypress-run:
+  e2e:
     runs-on: ubuntu-latest
+
     defaults:
       run:
-        working-directory: frontend
+        working-directory: ./frontend
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install frontend dependencies
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
         run: npm ci
 
-      - name: Start backend
+      - name: Start frontend server
         run: |
-          cd ../backend
-          npm ci
-          npm run start:dev &
+          npm run build
+          npm install -g serve
+          serve -s build -l 3001 &
         env:
-          NODE_ENV: test
+          PORT: 3001
 
-      - name: Start frontend (port 3001)
-        run: PORT=3001 npm start &
-        env:
-          NODE_ENV: test
-
-      - name: Wait for frontend to be ready on port 3001
+      - name: Wait for frontend to be ready
         run: npx wait-on http://localhost:3001
 
-      - name: Run Cypress tests
-        run: npx cypress run
+      - name: Run Cypress E2E tests (with xvfb)
+        run: |
+          npx xvfb-run -a npx cypress run
