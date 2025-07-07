@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { EventEmitter } from 'events';
 
 
-//minor comment to trigger GitHub Actions workflow. TO be deleted later!
+//minor comment to trigger full CI/CD cycle - GitHub Actions workflow + deployment
 // Helper to mock fs.createReadStream with event emitters and required ReadStream properties
 function mockCsvStream(mockData: any[]): fs.ReadStream {
   class MockStream extends EventEmitter {
