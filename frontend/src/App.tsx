@@ -279,10 +279,10 @@ const App: React.FC = () => {
         >
           <h2>Recommended Action:</h2>
           <p>
-            Buy Time: <strong>{new Date(result.buyTime).toLocaleString('en-US', { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' })}</strong> at price <strong>${result.buyPrice.toFixed(2)}</strong>
+            Buy Time: <strong>{new Date(result.buyTime).toLocaleString('en-US', { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}</strong> at price <strong>${result.buyPrice.toFixed(2)}</strong>
           </p>
           <p>
-            Sell Time: <strong>{new Date(result.sellTime).toLocaleString('en-US', { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' })}</strong> at price <strong>${result.sellPrice.toFixed(2)}</strong>
+            Sell Time: <strong>{new Date(result.sellTime).toLocaleString('en-US', { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}</strong> at price <strong>${result.sellPrice.toFixed(2)}</strong>
           </p>
           {result.stocksBought === 0 ? (
             <p style={{ color: '#b91c1c', fontWeight: 500, marginTop: 12 }}>Insufficient funds to buy any stocks at the buy price.</p>
