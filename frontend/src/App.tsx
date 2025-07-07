@@ -9,6 +9,7 @@ interface ApiResponse {
   sellPrice: number | null;
 }
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
 const App: React.FC = () => {
   const [startTimeStr, setStartTimeStr] = useState<string | null>(null);
@@ -53,7 +54,7 @@ const App: React.FC = () => {
     }
     try {
       const response = await fetch(
-        `http://localhost:8000/api/v1/best-trade?start=${encodeURIComponent(startTimeStr)}&end=${encodeURIComponent(endTimeStr)}`
+        `${API_BASE_URL}/api/v1/best-trade?start=${encodeURIComponent(startTimeStr)}&end=${encodeURIComponent(endTimeStr)}`
       );
 
       if (!response.ok) {

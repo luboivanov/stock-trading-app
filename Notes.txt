@@ -1,25 +1,46 @@
-cd c:\Projects\FullStackStockApp\backend
-npm run start:dev
+Backend
+	c:\Projects\FullStackStockApp\backend
+	npm run start:dev
+	http://localhost:8000/api/v1/best-trade?start=2024-07-01T10:00:00Z&end=2024-07-01T12:00:00Z&funds=1000
+	Swagger: http://localhost:8000/api#/App/AppController_getBestTrade
+
+Frontend
+	http://localhost:3001/
+
+Github
+	https://github.com/luboivanov/stock-trading-app
+
+Cypress
+	http://localhost:3001/__/#/specs/runner?file=cypress/e2e/app.cy.js
+
+Render.com
+	Backend: 
+		https://stock-backend-gvvp.onrender.com/
+		https://stock-backend-gvvp.onrender.com/api/v1/best-trade?start=2025-07-01T10:00:00Z&end=2025-07-01T10:00:11Z
+	Swagger:
+		https://stock-backend-gvvp.onrender.com/api#/App/AppController_getBestTrade
+	Frontend:
+		https://stock-frontend-txmg.onrender.com/
 
 
 Testing:
-no buy/sell, flat prices - 2024-07-01T10:00:20Z to 2024-07-01T10:00:25Z
-no buy/sell, descending prices - 2024-07-01T10:00:26Z to 2024-07-01T10:00:29Z
-typical scenario - 00 to 38, buy at 01, sell at 04
-equal profit, earrlier deal - 2024-07-01T10:00:01Z to 2024-07-01T10:00:11Z -> to return 01 to 04
-???equal profit, same sell date, shorter duration (later buy date) 2024-07-01T10:00:30Z to 2024-07-01T10:00:34Z
+	no buy/sell, flat prices - 2024-07-01T10:00:20Z to 2024-07-01T10:00:25Z
+	no buy/sell, descending prices - 2024-07-01T10:00:26Z to 2024-07-01T10:00:29Z
+	typical scenario - 00 to 38, buy at 01, sell at 04
+	equal profit, earrlier deal - 2024-07-01T10:00:01Z to 2024-07-01T10:00:11Z -> to return 01 to 04
+	???equal profit, same sell date, shorter duration (later buy date) 2024-07-01T10:00:30Z to 2024-07-01T10:00:34Z
 
 test the UI:
-2024-07-01 10:00:00 UTC
-http://localhost:3001/
+	2024-07-01 10:00:00 UTC
+	http://localhost:3001/
 
 run BE unit tests:
-cd c:\Projects\FullStackStockApp\backend>
-npm run test -- --coverage
+	cd c:\Projects\FullStackStockApp\backend>
+	npm run test -- --coverage
 
 run FE unit tests:
-go to c:\Projects\FullStackStockApp\frontend>
-npm test -- --coverage
+	go to c:\Projects\FullStackStockApp\frontend>
+	npm test -- --coverage
 
 run Cypress E2E tests:
 	go to c:\Projects\FullStackStockApp\frontend>
@@ -28,32 +49,32 @@ run Cypress E2E tests:
 
 
 ToDo:
-open api, stub
 //fraction shares
-xsrf
+
 
 Production ready:
-reverse proxy via NGINX or Traefik.
-Host on a provider like Render, DigitalOcean, AWS, Vercel, etc.
-CI/CD - Set up GitHub Actions / GitLab CI / CircleCI:
-HTTPS
+	reverse proxy via NGINX or Traefik.
+	Host on a provider like Render, DigitalOcean, AWS, Vercel, etc.
+	CI/CD - Set up GitHub Actions / GitLab CI / CircleCI:
+	HTTPS
 
-xsrf
-Session fixation filter?
-telemetry?
-Enable CORS properly (e.g., restrict to known frontend domains).
-Add a rate limiter (e.g., @nestjs/throttler) to prevent abuse.
-Use a logging library like @nestjs/terminus or Winston., 
-Log errors and key events.
-Consider adding health checks.
-Deployment Monitoring - Use tools like Grafana, Prometheus, or LogRocket/Sentry for observability.
-Documentation
-	Document the API using Swagger (you already did — ensure it's clean).
-	Provide a README explaining:
-	Project purpose
-	How to run frontend/backend
-	How to test
-	How to deploy
+	open api, stub
+	xsrf
+	Session fixation filter?
+	telemetry?
+	Enable CORS properly (e.g., restrict to known frontend domains).
+	Add a rate limiter (e.g., @nestjs/throttler) to prevent abuse.
+	Use a logging library like @nestjs/terminus or Winston., 
+	Log errors and key events.
+	Consider adding health checks.
+	Deployment Monitoring - Use tools like Grafana, Prometheus, or LogRocket/Sentry for observability.
+	Documentation
+		Document the API using Swagger (you already did — ensure it's clean).
+		Provide a README explaining:
+		Project purpose
+		How to run frontend/backend
+		How to test
+		How to deploy
 
 
 Prod Ready Low prio
