@@ -44,6 +44,7 @@ test the UI:
 run BE unit tests:
 	cd c:\Projects\FullStackStockApp\backend>
 	npm run test -- --coverage
+	BE unit test wjest 
 
 run FE unit tests:
 	go to c:\Projects\FullStackStockApp\frontend>
@@ -51,7 +52,8 @@ run FE unit tests:
 
 run Cypress E2E tests:
 	go to c:\Projects\FullStackStockApp\frontend>
-	npx cypress open
+	npx cypress open - opens the UI
+	npx cypress run - to run in the console
 	http://localhost:57285/__/#/specs
 
 
@@ -62,12 +64,23 @@ ToDo:
 Production ready:
 	reverse proxy via NGINX or Traefik.
 	//Host in the cloud - Render.com 
+	Automatically deployed in a container (managed by Render)
+	Ready for horizontal scaling (Render Dashboard → Service → Scaling → Manual Scaling)
+		Manual scaling up to 3 instances (requires non-free Starter pack)
+		Auto scaling - Pro pack
 	CI/CD - Set up GitHub Actions / GitLab CI / CircleCI:
 	//HTTPS
 	//Environment variables REACT_APP_API_URL
-	//HEalthCheck at /api/health - Render checks app health after every deployment and Restarts the backend if it becomes unresponsive
+	//HEalthCheck at /api/health with TerminusModule - Render checks app health after every deployment and Restarts the backend if it becomes unresponsive
+
+Frontend + reverse proxy setup — Serve both backend and frontend under one domain (if desired).
+
+CI/CD Pipeline — Automate deployments from GitHub.
+
+Security & Observability — Add logging, rate limiting, CORS hardening, etc.
 
 
+	clean the logs related to react-datepicker when deploying in Render
 	??Add Slack/Email notifications on test failures?
 	open api, stub
 	xsrf
