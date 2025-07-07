@@ -2,45 +2,59 @@ name: E2E Tests
 
 on:
   push:
-    paths:
-      - 'frontend/**'
-      - 'backend/**'
+    branches:
+      - main
   pull_request:
-    paths:
-      - 'frontend/**'
-      - 'backend/**'
+    branches:
+      - main
 
 jobs:
   e2e:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: ./frontend
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install dependencies
+      - name: Install backend dependencies
+        working-directory: backend
         run: npm ci
 
-      - name: Start frontend server
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Start backend
+        working-directory: backend
         run: |
-          npm run build
-          npm install -g serve
-          serve -s build -l 3001 &
-        env:
-          PORT: 3001
+          npm run start &
+
+      - name: Start frontend
+        working-directory: frontend
+        run: |
+          npm start &
 
       - name: Wait for frontend to be ready
-        run: npx wait-on http://localhost:3001
-
-      - name: Run Cypress E2E tests (with xvfb)
         run: |
-          xvfb-run -a npx cypress run
+          echo "Waiting for frontend on http://localhost:3001..."
+          for i in {1..30}; do
+            if curl -s http://localhost:3001 >/dev/null; then
+              echo "Frontend is up!"
+              break
+            fi
+            echo "Waiting ($i)..."
+            sleep 3
+          done
+
+      - name: Fix Cypress permissions
+        working-directory: frontend
+        run: chmod +x ./node_modules/.bin/cypress
+
+      - name: Run Cypress E2E tests
+        working-directory: frontend
+        run: xvfb-run -a npx cypress run
