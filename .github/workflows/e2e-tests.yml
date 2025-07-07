@@ -43,4 +43,4 @@ jobs:
 
       - name: Run Cypress E2E tests (with xvfb)
         run: |
-          npx xvfb-run -a npx cypress run
+          xvfb-run -a npx cypress run
