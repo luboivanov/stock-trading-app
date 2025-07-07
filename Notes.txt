@@ -3,14 +3,17 @@ Backend
 	npm run start:dev
 	http://localhost:8000/api/v1/best-trade?start=2024-07-01T10:00:00Z&end=2024-07-01T12:00:00Z&funds=1000
 	Swagger: http://localhost:8000/api#/App/AppController_getBestTrade
+	Health: http://localhost:8000/health
 
 Frontend
 	c:\Projects\FullStackStockApp\frontend
-	npm start
+	npm run build
+	npm start:prod
 	http://localhost:3001/
 
 Github
 	https://github.com/luboivanov/stock-trading-app
+	push to the above :) 
 
 Cypress
 	http://localhost:3001/__/#/specs/runner?file=cypress/e2e/app.cy.js
@@ -19,6 +22,8 @@ Render.com
 	Backend: 
 		https://stock-backend-gvvp.onrender.com/
 		https://stock-backend-gvvp.onrender.com/api/v1/best-trade?start=2025-07-01T10:00:00Z&end=2025-07-01T10:00:11Z
+	Backend health:
+		https://stock-backend-gvvp.onrender.com/api/health
 	Swagger:
 		https://stock-backend-gvvp.onrender.com/api#/App/AppController_getBestTrade
 	Frontend:
@@ -56,11 +61,14 @@ ToDo:
 
 Production ready:
 	reverse proxy via NGINX or Traefik.
-	//Host on a provider like Render, DigitalOcean, AWS, Vercel, etc.
+	//Host in the cloud - Render.com 
 	CI/CD - Set up GitHub Actions / GitLab CI / CircleCI:
-	HTTPS
+	//HTTPS
 	//Environment variables REACT_APP_API_URL
+	//HEalthCheck at /api/health - Render checks app health after every deployment and Restarts the backend if it becomes unresponsive
 
+
+	??Add Slack/Email notifications on test failures?
 	open api, stub
 	xsrf
 	Session fixation filter?
