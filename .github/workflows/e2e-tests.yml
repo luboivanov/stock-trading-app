@@ -34,12 +34,12 @@ jobs:
       - name: Start backend
         working-directory: backend
         run: |
-          npm run start &
+          npm run start & sleep 10
 
       - name: Start frontend
         working-directory: frontend
         run: |
-          npm start &
+          npm start & sleep 10
 
       - name: Wait for frontend to be ready
         run: |
@@ -52,10 +52,6 @@ jobs:
             echo "Waiting ($i)..."
             sleep 3
           done
-
-      - name: Fix Cypress permissions
-        working-directory: frontend
-        run: chmod +x ./node_modules/.bin/cypress
 
       - name: Run Cypress E2E tests
         working-directory: frontend
