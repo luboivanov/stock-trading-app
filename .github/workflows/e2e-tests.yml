@@ -2,11 +2,13 @@ name: E2E Tests
 
 on:
   push:
-    branches:
-      - main
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
   pull_request:
-    branches:
-      - main
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
 
 jobs:
   e2e:
