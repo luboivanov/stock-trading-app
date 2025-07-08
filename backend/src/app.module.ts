@@ -3,9 +3,13 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HealthModule } from './health/health.module'; // Import the HealthModule to include health checks
 import { LoggerMiddleware } from './logger.middleware';
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 
 @Module({
-  imports: [HealthModule], // Add HealthModule to imports
+  imports: [
+    PrometheusModule.register(),
+    HealthModule
+  ], // Add PrometheusModule and HealthModule to imports
   controllers: [AppController],
   providers: [AppService],
 })
