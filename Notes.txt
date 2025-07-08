@@ -33,10 +33,7 @@ Render.com
 		https://stock-backend-gvvp.onrender.com/api/metrics
 	Frontend:
 		https://stock-frontend-txmg.onrender.com/
-Grafana:
-	Signed with my GitHub account
-	region - EU Germany
-	token name: stock-trade-app-prometheus-grafana
+
 	
 
 Testing:
@@ -119,7 +116,7 @@ Production ready DONE:
 		Useful for debugging, auditing, and tracking what happened in the app
 		https://dashboard.render.com/web/srv-d1lr0k7diees7381g510/logs
 	Prometheus installed
-		exposes /metrics endpoint for collecting metrics performance and health
+		exposes /metrics endpoint for collecting metrics performance and health, failed to visualise in Grafana (requires service worker)
 		https://stock-backend-gvvp.onrender.com/api/metrics
 
 	Accessibility basic coverage for users with motor disabilities (use the UI with keyboard only). 
@@ -131,11 +128,8 @@ Production ready TODO:
 		Add logging, library like @nestjs/terminus or Winston., Log errors and key events.
 		rate limiting (e.g., @nestjs/throttler) to prevent abuse., 
 		Monitoring - Monitor uptime, integrate with tools like Prometheus, Grafana
-		Telemetry (optional)
-		If you want to add custom application metrics (like request counts, error rates, or business-specific metrics), you can do so using the Prometheus service in your NestJS app.
-	Deployment Monitoring - Use tools like Grafana, Prometheus, or LogRocket/Sentry for observability.
+	
 	Documentation
-		Document the API using Swagger (you already did — ensure it's clean).
 		Provide a README explaining:
 			Project purpose
 			How to run frontend/backend
@@ -161,6 +155,8 @@ Prod Ready Low prio and Not needed
 	Infrastructure as Code (IaC)
 	Automatically create git tags/releases on successful merges.
 	Canary or blue/green deployments
+	Deployment Monitoring - Use tools like Grafana, Prometheus, or LogRocket/Sentry for observability.
+		Failed adding it, requires service worker in Render, which is paid subscription. Revisit as optional.
 
 
 

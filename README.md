@@ -4,6 +4,21 @@ A full-stack, sessionless web application for optimal stock trading analysis, de
 
 ---
 
+## Important Links
+
+- **Frontend (Production):** [https://stock-frontend-txmg.onrender.com/](https://stock-frontend-txmg.onrender.com/)
+- **Backend (Production):** [https://stock-backend-gvvp.onrender.com/](https://stock-backend-gvvp.onrender.com/)
+- **Best Trade API Example:** [https://stock-backend-gvvp.onrender.com/api/v1/best-trade?start=2025-07-01T10:00:00Z&end=2025-07-01T10:00:11Z](https://stock-backend-gvvp.onrender.com/api/v1/best-trade?start=2025-07-01T10:00:00Z&end=2025-07-01T10:00:11Z)
+- **Backend Health Check:** [https://stock-backend-gvvp.onrender.com/api/health](https://stock-backend-gvvp.onrender.com/api/health)
+- **Swagger UI:** [https://stock-backend-gvvp.onrender.com/api#/App/AppController_getBestTrade](https://stock-backend-gvvp.onrender.com/api#/App/AppController_getBestTrade)
+- **API JSON:** [https://stock-backend-gvvp.onrender.com/api-json](https://stock-backend-gvvp.onrender.com/api-json)
+- **Prometheus Metrics:** [https://stock-backend-gvvp.onrender.com/api/metrics](https://stock-backend-gvvp.onrender.com/api/metrics)
+- **Architecture Diagram (Miro):** [https://miro.com/app/board/uXjVIgV7WOM=/](https://miro.com/app/board/uXjVIgV7WOM=/)
+- **CI/CD Workflow (Miro):** [https://miro.com/app/board/uXjVIgVY4fU=/](https://miro.com/app/board/uXjVIgVY4fU=/)
+- **GitHub Repository:** [https://github.com/luboivanov/stock-trading-app](https://github.com/luboivanov/stock-trading-app)
+
+---
+
 ## Project Overview (Requirements)
 
 ### Non-functional Requirements
