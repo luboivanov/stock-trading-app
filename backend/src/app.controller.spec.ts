@@ -34,11 +34,11 @@ describe('AppController', () => {
       buyPrice: 1,
       sellPrice: 2,
     };
-    (appService.getBestTrade as jest.Mock).mockResolvedValue(mockResult);
+    const spy = jest
+      .spyOn(appService, 'getBestTrade')
+      .mockResolvedValue(mockResult);
     const result = await appController.getBestTrade('start', 'end');
-    expect(
-      (appService.getBestTrade as jest.Mock).bind(appService),
-    ).toHaveBeenCalled();
+    expect(spy).toHaveBeenCalled();
     expect(result).toBe(mockResult);
   });
 });
