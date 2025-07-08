@@ -3,6 +3,7 @@ Backend
 	npm run start:dev
 	http://localhost:8000/api/v1/best-trade?start=2024-07-01T10:00:00Z&end=2024-07-01T12:00:00Z&funds=1000
 	Swagger: http://localhost:8000/api#/App/AppController_getBestTrade
+	API-JSON doc: http://localhost:8000/api-json
 	Health: http://localhost:8000/health
 
 Frontend
@@ -26,6 +27,8 @@ Render.com
 		https://stock-backend-gvvp.onrender.com/api/health
 	Swagger:
 		https://stock-backend-gvvp.onrender.com/api#/App/AppController_getBestTrade
+	API-JSON:
+		https://stock-backend-gvvp.onrender.com/api-json
 	Frontend:
 		https://stock-frontend-txmg.onrender.com/
 
@@ -56,51 +59,110 @@ run Cypress E2E tests:
 	npx cypress run - to run in the console
 	http://localhost:57285/__/#/specs
 
+run Linter:
+	c:\Projects\FullStackStockApp\backend>npm run lint
+	c:\Projects\FullStackStockApp\frontend>npx eslint . --ext .js,.jsx,.ts,.tsx
+
 
 ToDo:
 //fraction shares
 
 
-Production ready:
-	reverse proxy via NGINX or Traefik.
-	//Host in the cloud - Render.com 
-	Automatically deployed in a container (managed by Render)
+Production ready DONE:
+	Functionally ready with 2 bonus features (fractional shareas and date/time selector with seconds for precise trade time selection)
+	Unit tests
+		Frontend - 97% coverage
+		Backend - 93% coverage
+	E2E testing
+		Cypress, 5 tests
+	Version control - Git locally + GitHub
+	Dev environment on localhost
+	Production in the cloud - hosted at Render.com 
+	Automatically deployed in a container (managed by Render, Docker-like)
 	Ready for horizontal scaling (Render Dashboard → Service → Scaling → Manual Scaling)
-		Manual scaling up to 3 instances (requires non-free Starter pack)
-		Auto scaling - Pro pack
-	CI/CD - Set up GitHub Actions / GitLab CI / CircleCI:
-	//HTTPS
-	//Environment variables REACT_APP_API_URL
-	//HEalthCheck at /api/health with TerminusModule - Render checks app health after every deployment and Restarts the backend if it becomes unresponsive
+		Manual scaling up to 3 instances (requires non-free pack)
+		Auto scaling (requires expensive Pro pack)
+	Automatic Reverse Proxy and CDN by Render
+		Render uses Content Delivery Network (CDN) - automatically distributes static files (HTML, CSS, JS, images, etc.) across data centers worldwide.
+		Render's CDN acts as Reverse Proxy 
+			Accepts the incoming HTTPS requests
+			Serves from cache whenever possible (css, images, etc)
+			Forwards the request to your Render server
+	CI/CD - GitHub Actions:
+		automatically builds and triggers backend and frontend unit tests and Cypress E2E
+		email notifications on failed tests
+		automated deployment for frontend and backend 
+	Backend healthCheck
+		at /api/health with TerminusModule 
+		Render.com checks app health after every deployment 
+		Restarts the backend if it becomes unresponsive
+	Swagger for API docs, available at /api#/App/AppController_getBestTrade
+	HTTPS for all endpoints in the cloud - backend, frontend, swagger, health checks
+	Environment variables (REACT_APP_API_URL)
+	CORS (Cross-Origin Resource Sharing) enabled since the frontend (React app) and backend (NestJS) apps run on different ports and domains
+	Linter
+		Covers both front-end and back-end and even E2E Cypress tests
+		Added as part of the CI workflow in GitHub Actions
 
-Frontend + reverse proxy setup — Serve both backend and frontend under one domain (if desired).
-
-CI/CD Pipeline — Automate deployments from GitHub.
-
-Security & Observability — Add logging, rate limiting, CORS hardening, etc.
+	Accessibility basic coverage for users with motor disabilities (use the UI with keyboard only). 
 
 
-	clean the logs related to react-datepicker when deploying in Render
-	??Add Slack/Email notifications on test failures?
-	open api, stub
-	xsrf
-	Session fixation filter?
-	telemetry?
-	Enable CORS properly (e.g., restrict to known frontend domains).
-	Add a rate limiter (e.g., @nestjs/throttler) to prevent abuse.
-	Use a logging library like @nestjs/terminus or Winston., 
-	Log errors and key events.
-	Consider adding health checks.
+
+Production ready TODO:
+	Frontend Linters
+	Prettier (installed, needs tuning)
+	Integrate linters (ESLint, Stylelint) and code formatters (Prettier).
+	Security & Observability — 
+		Add logging, library like @nestjs/terminus or Winston., Log errors and key events.
+		rate limiting (e.g., @nestjs/throttler) to prevent abuse., 
+		Monitoring - Monitor uptime, integrate with tools like Prometheus, Grafana
+		Telemetry (optional)
 	Deployment Monitoring - Use tools like Grafana, Prometheus, or LogRocket/Sentry for observability.
 	Documentation
 		Document the API using Swagger (you already did — ensure it's clean).
 		Provide a README explaining:
-		Project purpose
-		How to run frontend/backend
-		How to test
-		How to deploy
+			Project purpose
+			How to run frontend/backend
+			How to test
+			How to deploy
+		Architecture diagram (Miro)
+		Deployment diagram (Miro)
+		Deployment flow description
+		Readme.md in GitHub
+		Updload requirements
 
 
-Prod Ready Low prio
-	Accessibility
+Prod Ready Low prio and Not needed
+	Secrets Management (GitHub) - not applicable for the project
+	Load Balancer - not needed atm, could be done once scaling to multiple instances or when custom routing logic is needed(e.g., multiple services behind one domain)
+	Reverse proxy (nginx or other) - not needed atm, Render is automatically doing Reverse proxying from the public URL to the internal service.
+	API mocks (Stubs) - not urgent as frontend is integrated and running against the actual backend in CI and local dev and already testing the full stack (unit + E2E) with real APIs
+	CSRF (Cross-Site Request Forgery) - not needed as the API is stateless and does not use cookies for authentication
+	Session fixation filter (to prevent from cases when attacker sets or predicts a user's session ID before they log in) - not needed as no sessions are implemented
+	Serve both backend and frontend under one domain.
+	Full Accessibility - including users with visual impairment 
 	Localization and Internationalization
+	Infrastructure as Code (IaC)
+	Automatically create git tags/releases on successful merges.
+	Canary or blue/green deployments
+
+
+
+Deployment Flow
+Code Push (main)
+      ↓
+GitHub Actions
+  ├─ Run Unit Tests
+  ├─ Run Cypress E2E
+  └─ ✅ All Pass → Push to main
+      ↓
+Render Auto-deploy Triggered
+  ├─ Backend Rebuild & Restart
+  └─ Frontend Rebuild & CDN Upload
+
+Visual Representation of Reverse Proxy and CDN
+Client (Browser)
+      ↓
+[Render CDN / Reverse Proxy]
+      ↓
+Frontend static files (React build output)
