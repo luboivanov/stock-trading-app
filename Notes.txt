@@ -63,6 +63,8 @@ run Linter:
 	c:\Projects\FullStackStockApp\backend>npm run lint
 	c:\Projects\FullStackStockApp\frontend>npx eslint . --ext .js,.jsx,.ts,.tsx
 
+run Prettier:
+	go to either frontend and backend folders and run npm run forma
 
 ToDo:
 //fraction shares
@@ -100,7 +102,7 @@ Production ready DONE:
 	HTTPS for all endpoints in the cloud - backend, frontend, swagger, health checks
 	Environment variables (REACT_APP_API_URL)
 	CORS (Cross-Origin Resource Sharing) enabled since the frontend (React app) and backend (NestJS) apps run on different ports and domains
-	Linter
+	Linter (ESLint) for code quality & correctness
 		Covers both front-end and back-end and even E2E Cypress tests
 		Added as part of the CI workflow in GitHub Actions
 
@@ -109,7 +111,6 @@ Production ready DONE:
 
 
 Production ready TODO:
-	Frontend Linters
 	Prettier (installed, needs tuning)
 	Integrate linters (ESLint, Stylelint) and code formatters (Prettier).
 	Security & Observability — 
