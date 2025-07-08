@@ -1,0 +1,15 @@
+prometheus.remote_write "metrics_hosted_prometheus" {
+   endpoint {
+      name = "hosted-prometheus"
+      url  = "https://prometheus-prod-24-prod-eu-west-2.grafana.net/api/prom/push"
+
+      basic_auth {
+        username = env("GRAFANA_CLOUD_USERNAME")
+        password = env("GRAFANA_CLOUD_PASSWORD")
+      }
+   }
+}
+
+prometheus.scrape "backend_metrics" {
+  targets = ["https://stock-backend-gvvp.onrender.com/api/metrics"]
+}
