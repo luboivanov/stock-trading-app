@@ -7,14 +7,14 @@ function isValidDate(date: Date | null): date is Date {
 }
 
 function parseIsoToUtc(dateStr: string): Date {
-  return dateStr.match(/(Z|[+\-]\d{2}:\d{2})$/)
+  return /(Z|([+-]\d{2}:\d{2}))$/.test(dateStr)
     ? new Date(dateStr)
     : new Date(dateStr + 'Z');
 }
 
 @Injectable()
 export class AppService {
-  async getBestTrade(start: string, end: string, funds?: string) {
+  async getBestTrade(start: string, end: string) {
     try {
       const pricePoints: { timestamp: Date; price: number }[] = [];
 
@@ -27,7 +27,7 @@ export class AppService {
       const csvStream = fs
         .createReadStream(csvFilePath)
         .pipe(csv({ headers: ['timestamp', 'price'] }))
-        .on('data', (row) => {
+        .on('data', (row: { timestamp: string; price: string }) => {
           const timestamp = new Date(row.timestamp);
           const price = parseFloat(row.price);
           if (isValidDate(timestamp) && !isNaN(price)) {
@@ -36,7 +36,7 @@ export class AppService {
             console.warn('Skipping invalid CSV row:', row);
           }
         });
-      
+
       //read the CSV and await until it is fully read before proceeding (csv-parser stream works asynchronously)
       await new Promise((resolve, reject) => {
         csvStream.on('end', resolve);
@@ -51,7 +51,7 @@ export class AppService {
       }
 
       const startTimeFromApi = parseIsoToUtc(start);
-      const endTimeFromApi   = parseIsoToUtc(end);
+      const endTimeFromApi = parseIsoToUtc(end);
       const csvStartTime = pricePoints[0].timestamp;
       const csvEndTime = pricePoints[pricePoints.length - 1].timestamp;
 
@@ -86,7 +86,9 @@ export class AppService {
       );
 
       if (relevantPrices.length === 0) {
-        throw new BadRequestException('No data points found in the given time range.');
+        throw new BadRequestException(
+          'No data points found in the given time range.',
+        );
       }
 
       //Let's do the business - Calculate best buy-sell times
@@ -105,18 +107,22 @@ export class AppService {
         if (potentialProfit > 0) {
           const currentBuyTime = lowestPriceTime;
           const currentSellTime = entry.timestamp;
-          const currentDuration = currentSellTime.getTime() - currentBuyTime.getTime();
+          const currentDuration =
+            currentSellTime.getTime() - currentBuyTime.getTime();
 
           let shouldUpdate = false;
 
           if (potentialProfit > maxProfit) {
             shouldUpdate = true;
           } else if (potentialProfit === maxProfit) {
-            const previousDuration = bestSellTime && bestBuyTime ? bestSellTime.getTime() - bestBuyTime.getTime(): Infinity;
+            const previousDuration =
+              bestSellTime && bestBuyTime
+                ? bestSellTime.getTime() - bestBuyTime.getTime()
+                : Infinity;
 
             if (currentDuration < previousDuration) {
               shouldUpdate = true;
-            } 
+            }
           }
 
           if (shouldUpdate) {

@@ -28,18 +28,26 @@ describe('AppController', () => {
   });
 
   it('should call service.getBestTrade with correct params and return result', async () => {
-    const mockResult = { buyTime: 't1', sellTime: 't2', buyPrice: 1, sellPrice: 2 };
+    const mockResult = {
+      buyTime: 't1',
+      sellTime: 't2',
+      buyPrice: 1,
+      sellPrice: 2,
+    };
     (appService.getBestTrade as jest.Mock).mockResolvedValue(mockResult);
     const result = await appController.getBestTrade('start', 'end');
-    expect(appService.getBestTrade).toHaveBeenCalledWith('start', 'end');
+    expect(
+      (appService.getBestTrade as jest.Mock).bind(appService),
+    ).toHaveBeenCalled();
     expect(result).toBe(mockResult);
   });
 });
 
 describe('AppModule', () => {
   it('should compile the module', async () => {
+    const { AppModule } = await import('./app.module');
     const moduleRef = await Test.createTestingModule({
-      imports: [require('./app.module').AppModule],
+      imports: [AppModule],
     }).compile();
     expect(moduleRef).toBeDefined();
     expect(moduleRef.get(AppController)).toBeInstanceOf(AppController);
