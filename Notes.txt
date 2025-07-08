@@ -29,9 +29,15 @@ Render.com
 		https://stock-backend-gvvp.onrender.com/api#/App/AppController_getBestTrade
 	API-JSON:
 		https://stock-backend-gvvp.onrender.com/api-json
+	Prometheus metrics:
+		https://stock-backend-gvvp.onrender.com/api/metrics
 	Frontend:
 		https://stock-frontend-txmg.onrender.com/
-
+Grafana:
+	Signed with my GitHub account
+	region - EU Germany
+	token name: stock-trade-app-prometheus-grafana
+	
 
 Testing:
 	no buy/sell, flat prices - 2024-07-01T10:00:20Z to 2024-07-01T10:00:25Z
@@ -64,14 +70,14 @@ run Linter:
 	c:\Projects\FullStackStockApp\frontend>npx eslint . --ext .js,.jsx,.ts,.tsx
 
 run Prettier:
-	go to either frontend and backend folders and run npm run forma
+	go to either frontend and backend folders and run npm run format
 
 ToDo:
 //fraction shares
 
 
 Production ready DONE:
-	Functionally ready with 2 bonus features (fractional shareas and date/time selector with seconds for precise trade time selection)
+	Functionally ready with 2 bonus features (fractional shares and date/time selector with seconds for precise trade time selection)
 	Unit tests
 		Frontend - 97% coverage
 		Backend - 93% coverage
@@ -89,7 +95,7 @@ Production ready DONE:
 		Render's CDN acts as Reverse Proxy 
 			Accepts the incoming HTTPS requests
 			Serves from cache whenever possible (css, images, etc)
-			Forwards the request to your Render server
+			Forwards the request to the Render server
 	CI/CD - GitHub Actions:
 		automatically builds and triggers backend and frontend unit tests and Cypress E2E
 		email notifications on failed tests
@@ -105,19 +111,28 @@ Production ready DONE:
 	Linter (ESLint) for code quality & correctness
 		Covers both front-end and back-end and even E2E Cypress tests
 		Added as part of the CI workflow in GitHub Actions
+	Prettier
+		Covers front-end and back-end
+		Added as part of the CI workflow in GitHub Actions
+	Winston
+		Records events, errors, warnings, and info messages of the backend code
+		Useful for debugging, auditing, and tracking what happened in the app
+		https://dashboard.render.com/web/srv-d1lr0k7diees7381g510/logs
+	Prometheus installed
+		exposes /metrics endpoint for collecting metrics performance and health
+		https://stock-backend-gvvp.onrender.com/api/metrics
 
 	Accessibility basic coverage for users with motor disabilities (use the UI with keyboard only). 
 
 
 
 Production ready TODO:
-	Prettier (installed, needs tuning)
-	Integrate linters (ESLint, Stylelint) and code formatters (Prettier).
 	Security & Observability — 
 		Add logging, library like @nestjs/terminus or Winston., Log errors and key events.
 		rate limiting (e.g., @nestjs/throttler) to prevent abuse., 
 		Monitoring - Monitor uptime, integrate with tools like Prometheus, Grafana
 		Telemetry (optional)
+		If you want to add custom application metrics (like request counts, error rates, or business-specific metrics), you can do so using the Prometheus service in your NestJS app.
 	Deployment Monitoring - Use tools like Grafana, Prometheus, or LogRocket/Sentry for observability.
 	Documentation
 		Document the API using Swagger (you already did — ensure it's clean).
