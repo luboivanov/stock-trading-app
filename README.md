@@ -46,7 +46,7 @@ A full-stack, sessionless web application for optimal stock trading analysis, de
 
 ## Architecture Overview
 
-![Architecture Diagram](frontend/documentation/Architecture%20Diagram.jpg)
+<img src="frontend/documentation/Architecture Diagram.jpg" alt="Architecture Diagram" style="max-width:100%; height:auto; display:block; margin:auto;" />
 
 - **Frontend:** React app, served via Render CDN.
 - **Backend:** NestJS API, exposes business logic and metrics endpoints.
@@ -58,7 +58,7 @@ A full-stack, sessionless web application for optimal stock trading analysis, de
 
 ## Deployment Pipeline
 
-![CI/CD Workflow](frontend/documentation/CI_CD%20Workflow.jpg)
+<img src="frontend/documentation/CI_CD Workflow.jpg" alt="CI/CD Workflow" style="max-width:100%; height:auto; display:block; margin:auto;" />
 
 - Code is pushed to GitHub.
 - GitHub Actions run lint, unit, and E2E tests.
