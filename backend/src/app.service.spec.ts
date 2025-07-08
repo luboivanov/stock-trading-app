@@ -39,12 +39,12 @@ describe('AppService', () => {
   it('should throw for invalid start or end time', async () => {
     jest.spyOn(fs, 'existsSync').mockReturnValue(true);
     jest.spyOn(fs, 'createReadStream').mockReturnValue(mockCsvStream([]));
-    await expect(
-      service.getBestTrade('invalid', '2025-07-05T01:00:00Z'),
-    ).rejects.toThrow('CSV file contains no valid entries.');
-    await expect(
-      service.getBestTrade('2025-07-05T00:00:00Z', 'invalid'),
-    ).rejects.toThrow('CSV file contains no valid entries.');
+    await expect(service.getBestTrade('invalid', '2025-07-05T01:00:00Z')).rejects.toThrow(
+      'CSV file contains no valid entries.',
+    );
+    await expect(service.getBestTrade('2025-07-05T00:00:00Z', 'invalid')).rejects.toThrow(
+      'CSV file contains no valid entries.',
+    );
   });
 
   it('should throw for out-of-range queries', async () => {
@@ -98,10 +98,7 @@ describe('AppService', () => {
       { timestamp: '2025-07-05T00:00:02Z', price: '120' },
     ];
     jest.spyOn(fs, 'createReadStream').mockReturnValue(mockCsvStream(mockData));
-    const result = await service.getBestTrade(
-      '2025-07-05T00:00:00Z',
-      '2025-07-05T00:00:02Z',
-    );
+    const result = await service.getBestTrade('2025-07-05T00:00:00Z', '2025-07-05T00:00:02Z');
     expect(result.buyTime).toBe('2025-07-05T00:00:00.000Z');
     expect(result.sellTime).toBe('2025-07-05T00:00:02.000Z');
     expect(result.buyPrice).toBe(100);
@@ -116,10 +113,7 @@ describe('AppService', () => {
       { timestamp: '2025-07-05T00:00:02Z', price: '200' },
     ];
     jest.spyOn(fs, 'createReadStream').mockReturnValue(mockCsvStream(mockData));
-    const result = await service.getBestTrade(
-      '2025-07-05T00:00:00Z',
-      '2025-07-05T00:00:02Z',
-    );
+    const result = await service.getBestTrade('2025-07-05T00:00:00Z', '2025-07-05T00:00:02Z');
     expect(result.buyTime).toBe('2025-07-05T00:00:00.000Z');
     expect(result.sellTime).toBe('2025-07-05T00:00:01.000Z');
     expect(result.buyPrice).toBe(100);
@@ -168,10 +162,7 @@ describe('AppService', () => {
       { timestamp: '2025-07-05T00:00:04Z', price: '230' },
     ];
     jest.spyOn(fs, 'createReadStream').mockReturnValue(mockCsvStream(mockData));
-    const result = await service.getBestTrade(
-      '2025-07-05T00:00:00Z',
-      '2025-07-05T00:00:04Z',
-    );
+    const result = await service.getBestTrade('2025-07-05T00:00:00Z', '2025-07-05T00:00:04Z');
     expect(result.buyTime).toBe('2025-07-05T00:00:00.000Z');
     expect(result.sellTime).toBe('2025-07-05T00:00:02.000Z');
     expect(result.buyPrice).toBe(100);
@@ -199,10 +190,7 @@ describe('AppService', () => {
     expect(result.buyPrice).toBe(100);
     expect(result.sellPrice).toBe(100 + numRows - 1);
     // Log memory usage delta (for manual review)
-    console.log(
-      'Memory used (MB):',
-      ((memAfter - memBefore) / 1024 / 1024).toFixed(2),
-    );
+    console.log('Memory used (MB):', ((memAfter - memBefore) / 1024 / 1024).toFixed(2));
     // Optionally, assert that memory usage does not exceed a threshold (e.g., 100MB)
     expect(memAfter - memBefore).toBeLessThan(100 * 1024 * 1024);
   });
@@ -211,12 +199,9 @@ describe('AppService', () => {
     jest.spyOn(fs, 'existsSync').mockReturnValue(true);
     // Mock a stream that throws an error
     const errorStream = new EventEmitter();
-    (errorStream as unknown as { pipe: () => typeof errorStream }).pipe = () =>
-      errorStream;
+    (errorStream as unknown as { pipe: () => typeof errorStream }).pipe = () => errorStream;
     setTimeout(() => errorStream.emit('error', new Error('Stream error')), 0);
-    jest
-      .spyOn(fs, 'createReadStream')
-      .mockReturnValue(errorStream as unknown as fs.ReadStream);
+    jest.spyOn(fs, 'createReadStream').mockReturnValue(errorStream as unknown as fs.ReadStream);
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     await expect(
       service.getBestTrade('2025-07-05T00:00:00Z', '2025-07-05T00:01:00Z'),

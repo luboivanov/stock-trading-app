@@ -26,7 +26,6 @@ const App: React.FC = () => {
   } | null>(null);
   const [error, setError] = useState('');
 
-
   //async function to handle the query and wait for the response
   //fetches data from the backend API and processes the response
   //validates inputs and handles errors
@@ -54,7 +53,7 @@ const App: React.FC = () => {
     }
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/v1/best-trade?start=${encodeURIComponent(startTimeStr)}&end=${encodeURIComponent(endTimeStr)}`
+        `${API_BASE_URL}/api/v1/best-trade?start=${encodeURIComponent(startTimeStr)}&end=${encodeURIComponent(endTimeStr)}`,
       );
 
       if (!response.ok) {
@@ -121,16 +120,31 @@ const App: React.FC = () => {
           gap: 18,
           marginBottom: 24,
         }}
-        onSubmit={e => { e.preventDefault(); handleQuery(); }} //prevent default form submission, no reload
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleQuery();
+        }} //prevent default form submission, no reload
       >
         <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 0 }}>
           <tbody>
             <tr style={{ height: 33 }}>
-              <td style={{ minWidth: 160, width: 180, fontWeight: 500, textAlign: 'right', padding: '0 16px 0 0', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>Start Time (UTC):</td>
+              <td
+                style={{
+                  minWidth: 160,
+                  width: 180,
+                  fontWeight: 500,
+                  textAlign: 'right',
+                  padding: '0 16px 0 0',
+                  verticalAlign: 'middle',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Start Time (UTC):
+              </td>
               <td style={{ width: '100%' }}>
                 <DatePicker
                   selected={startTimeStr ? utcStringToLocalDate(startTimeStr) : null}
-                  onChange={date => {
+                  onChange={(date) => {
                     if (date) {
                       const year = date.getFullYear();
                       const month = date.getMonth();
@@ -138,7 +152,7 @@ const App: React.FC = () => {
                       const hour = date.getHours();
                       const minute = date.getMinutes();
                       const second = date.getSeconds();
-                      const isoString = `${year.toString().padStart(4, '0')}-${(month+1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}Z`;
+                      const isoString = `${year.toString().padStart(4, '0')}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}Z`;
                       setStartTimeStr(isoString);
                     } else {
                       setStartTimeStr(null);
@@ -155,11 +169,23 @@ const App: React.FC = () => {
               </td>
             </tr>
             <tr style={{ height: 33 }}>
-              <td style={{ minWidth: 160, width: 180, fontWeight: 500, textAlign: 'right', padding: '0 16px 0 0', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>End Time (UTC):</td>
+              <td
+                style={{
+                  minWidth: 160,
+                  width: 180,
+                  fontWeight: 500,
+                  textAlign: 'right',
+                  padding: '0 16px 0 0',
+                  verticalAlign: 'middle',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                End Time (UTC):
+              </td>
               <td style={{ width: '100%' }}>
                 <DatePicker
                   selected={endTimeStr ? utcStringToLocalDate(endTimeStr) : null}
-                  onChange={date => {
+                  onChange={(date) => {
                     if (date) {
                       const year = date.getFullYear();
                       const month = date.getMonth();
@@ -167,7 +193,7 @@ const App: React.FC = () => {
                       const hour = date.getHours();
                       const minute = date.getMinutes();
                       const second = date.getSeconds();
-                      const isoString = `${year.toString().padStart(4, '0')}-${(month+1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}Z`;
+                      const isoString = `${year.toString().padStart(4, '0')}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}Z`;
                       setEndTimeStr(isoString);
                     } else {
                       setEndTimeStr(null);
@@ -185,14 +211,26 @@ const App: React.FC = () => {
               </td>
             </tr>
             <tr style={{ height: 33 }}>
-              <td style={{ minWidth: 160, width: 180, fontWeight: 500, textAlign: 'right', padding: '0 16px 0 0', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>Available Funds:</td>
+              <td
+                style={{
+                  minWidth: 160,
+                  width: 180,
+                  fontWeight: 500,
+                  textAlign: 'right',
+                  padding: '0 16px 0 0',
+                  verticalAlign: 'middle',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Available Funds:
+              </td>
               <td style={{ width: '100%' }}>
                 <input
                   type="number"
                   min="-10000000" // Allow negative for testing, but should be positive in production
                   step="0.01"
                   value={funds}
-                  onChange={e => setFunds(e.target.value)}
+                  onChange={(e) => setFunds(e.target.value)}
                   placeholder="e.g. 1000"
                   style={{
                     width: 170,
@@ -210,13 +248,25 @@ const App: React.FC = () => {
               </td>
             </tr>
             <tr style={{ height: 33 }}>
-              <td style={{ minWidth: 160, width: 180, fontWeight: 500, textAlign: 'right', padding: '0 16px 0 0', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>Allow fractional shares:</td>
+              <td
+                style={{
+                  minWidth: 160,
+                  width: 180,
+                  fontWeight: 500,
+                  textAlign: 'right',
+                  padding: '0 16px 0 0',
+                  verticalAlign: 'middle',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Allow fractional shares:
+              </td>
               <td style={{ width: '100%' }}>
                 <label style={{ cursor: 'pointer' }}>
                   <input
                     type="checkbox"
                     checked={fractional}
-                    onChange={e => setFractional(e.target.checked)}
+                    onChange={(e) => setFractional(e.target.checked)}
                     style={{ marginRight: 6, verticalAlign: 'middle' }}
                   />
                   Allow fractional shares
@@ -237,7 +287,7 @@ const App: React.FC = () => {
             fontWeight: 600,
             fontSize: 17,
             cursor: 'pointer',
-            boxShadow: '0 1px 4px rgba(99,102,241,0.08)'
+            boxShadow: '0 1px 4px rgba(99,102,241,0.08)',
           }}
         >
           Find Optimal Trade
@@ -255,7 +305,7 @@ const App: React.FC = () => {
             fontWeight: 500,
             fontSize: 16,
             fontFamily: 'Arial, sans-serif', // Match label font
-            boxShadow: '0 2px 8px rgba(255,88,88,0.08)'
+            boxShadow: '0 2px 8px rgba(255,88,88,0.08)',
           }}
         >
           <span style={{ marginRight: 8, fontSize: 20, verticalAlign: 'middle' }}>⚠️</span>
@@ -280,17 +330,44 @@ const App: React.FC = () => {
         >
           <h2>Recommended Action:</h2>
           <p>
-            Buy Time: <strong>{new Date(result.buyTime).toLocaleString('en-US', { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}</strong> at price <strong>${result.buyPrice.toFixed(2)}</strong>
+            Buy Time:{' '}
+            <strong>
+              {new Date(result.buyTime).toLocaleString('en-US', {
+                timeZone: 'UTC',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+              })}
+            </strong>{' '}
+            at price <strong>${result.buyPrice.toFixed(2)}</strong>
           </p>
           <p>
-            Sell Time: <strong>{new Date(result.sellTime).toLocaleString('en-US', { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}</strong> at price <strong>${result.sellPrice.toFixed(2)}</strong>
+            Sell Time:{' '}
+            <strong>
+              {new Date(result.sellTime).toLocaleString('en-US', {
+                timeZone: 'UTC',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+              })}
+            </strong>{' '}
+            at price <strong>${result.sellPrice.toFixed(2)}</strong>
           </p>
           {result.stocksBought === 0 ? (
-            <p style={{ color: '#b91c1c', fontWeight: 500, marginTop: 12 }}>Insufficient funds to buy any stocks at the buy price.</p>
+            <p style={{ color: '#b91c1c', fontWeight: 500, marginTop: 12 }}>
+              Insufficient funds to buy any stocks at the buy price.
+            </p>
           ) : (
             <>
               <p>
-                Stocks You can Buy: <strong>{fractional ? result.stocksBought.toFixed(2) : result.stocksBought}</strong>
+                Stocks You can Buy:{' '}
+                <strong>{fractional ? result.stocksBought.toFixed(2) : result.stocksBought}</strong>
               </p>
               <p>
                 Potential Profit: <strong>${result.profit?.toFixed(2) || 0}</strong>

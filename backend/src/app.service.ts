@@ -7,9 +7,7 @@ function isValidDate(date: Date | null): date is Date {
 }
 
 function parseIsoToUtc(dateStr: string): Date {
-  return /(Z|([+-]\d{2}:\d{2}))$/.test(dateStr)
-    ? new Date(dateStr)
-    : new Date(dateStr + 'Z');
+  return /(Z|([+-]\d{2}:\d{2}))$/.test(dateStr) ? new Date(dateStr) : new Date(dateStr + 'Z');
 }
 
 @Injectable()
@@ -86,9 +84,7 @@ export class AppService {
       );
 
       if (relevantPrices.length === 0) {
-        throw new BadRequestException(
-          'No data points found in the given time range.',
-        );
+        throw new BadRequestException('No data points found in the given time range.');
       }
 
       //Let's do the business - Calculate best buy-sell times
@@ -107,8 +103,7 @@ export class AppService {
         if (potentialProfit > 0) {
           const currentBuyTime = lowestPriceTime;
           const currentSellTime = entry.timestamp;
-          const currentDuration =
-            currentSellTime.getTime() - currentBuyTime.getTime();
+          const currentDuration = currentSellTime.getTime() - currentBuyTime.getTime();
 
           let shouldUpdate = false;
 

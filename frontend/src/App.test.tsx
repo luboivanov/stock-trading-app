@@ -22,7 +22,7 @@ jest.mock('react-datepicker', () => {
         type="datetime-local"
         value={value}
         aria-label={props.placeholderText}
-        onChange={e => {
+        onChange={(e) => {
           // Always parse as UTC by appending 'Z'
           let v = e.target.value;
           if (v && v.length === 16) v += ':00';
@@ -138,7 +138,6 @@ describe('App', () => {
     expect(await screen.findByText(/API error/i)).toBeInTheDocument();
   });
 
-
   it('shows raw error if error is invalid JSON', async () => {
     // Simulate an invalid JSON error string
     mockFetch.mockResolvedValueOnce({ ok: false, text: async () => '{not valid json}' });
@@ -154,7 +153,10 @@ describe('App', () => {
 
   it('shows error message from JSON error with message property', async () => {
     // Simulate a JSON error string with a message property
-    mockFetch.mockResolvedValueOnce({ ok: false, text: async () => JSON.stringify({ message: 'API exploded' }) });
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      text: async () => JSON.stringify({ message: 'API exploded' }),
+    });
     render(<App />);
     await setDateInput('Select start time (UTC)', '2025-07-05T00:00:00');
     await setDateInput('Select end time (UTC)', '2025-07-05T01:00:00');
@@ -203,7 +205,9 @@ describe('App', () => {
     await setDateInput('Select start time (UTC)', '2025-07-05T00:00:00');
     await setDateInput('Select end time (UTC)', '2025-07-05T00:00:02');
     await waitFor(() => {
-      expect(screen.queryByText(/Please specify both start and end times/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/Please specify both start and end times/i),
+      ).not.toBeInTheDocument();
     });
     const fundsInput = screen.getByPlaceholderText(/e.g. 1000/i);
     await userEvent.clear(fundsInput);
@@ -230,7 +234,9 @@ describe('App', () => {
     await setDateInput('Select start time (UTC)', '2025-07-05T00:00:00');
     await setDateInput('Select end time (UTC)', '2025-07-05T00:00:02');
     await waitFor(() => {
-      expect(screen.queryByText(/Please specify both start and end times/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/Please specify both start and end times/i),
+      ).not.toBeInTheDocument();
     });
     const fundsInput = screen.getByPlaceholderText(/e.g. 1000/i);
     await userEvent.clear(fundsInput);
@@ -247,7 +253,7 @@ describe('App', () => {
       json: async () => ({
         buyTime: null, // Simulate missing buyTime
         sellTime: null, // Simulate missing sellTime
-        buyPrice: null, // Simulate missing buyPrice   
+        buyPrice: null, // Simulate missing buyPrice
         sellPrice: null, // Simulate missing sellPrice
       }),
     });
@@ -258,6 +264,8 @@ describe('App', () => {
     await userEvent.clear(fundsInput);
     await userEvent.type(fundsInput, '100');
     fireEvent.click(screen.getByRole('button', { name: /Find Optimal Trade/i }));
-    expect(await screen.findByText(/No profitable trade found for the given time period\./i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/No profitable trade found for the given time period\./i),
+    ).toBeInTheDocument();
   });
 });

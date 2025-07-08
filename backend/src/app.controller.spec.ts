@@ -34,9 +34,7 @@ describe('AppController', () => {
       buyPrice: 1,
       sellPrice: 2,
     };
-    const spy = jest
-      .spyOn(appService, 'getBestTrade')
-      .mockResolvedValue(mockResult);
+    const spy = jest.spyOn(appService, 'getBestTrade').mockResolvedValue(mockResult);
     const result = await appController.getBestTrade('start', 'end');
     expect(spy).toHaveBeenCalled();
     expect(result).toBe(mockResult);
