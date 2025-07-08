@@ -1,3 +1,8 @@
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import App from './App';
+
 /**
  * @jest-environment jsdom
  */
@@ -29,11 +34,6 @@ jest.mock('react-datepicker', () => {
     );
   };
 });
-
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import App from './App';
 
 // Mock fetch globally
 const mockFetch = jest.fn();
