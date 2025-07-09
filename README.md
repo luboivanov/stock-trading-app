@@ -1,6 +1,6 @@
 # FullStackStockApp
 
-A full-stack, sessionless web application for optimal stock trading analysis, designed to be production ready and deployed on Render.com. The project features a React frontend, a NestJS backend, observability with Prometheus and Grafana, and automated CI/CD with GitHub Actions.
+A full-stack, sessionless web application for optimal stock trading analysis, designed to be production ready and deployed on Render.com. The project features a React frontend, a NestJS backend, observability with Prometheus, and automated CI/CD with GitHub Actions.
 
 ---
 
@@ -64,8 +64,7 @@ A full-stack, sessionless web application for optimal stock trading analysis, de
 <img src="frontend/documentation/Architecture Diagram.jpg" alt="Architecture Diagram" style="max-width:100%; height:auto; display:block; margin:auto;" />
 
 - **Frontend:** React app, served via Render CDN.
-- **Backend:** NestJS API, exposes business logic and metrics endpoints.
-- **Alloy Agent:** Background worker, scrapes backend metrics and forwards to Grafana Cloud.
+- **Backend:** NestJS API, exposes business logic, health checks, API docs and metrics endpoints.
 
 [View the Architecture Diagram in Miro](https://miro.com/app/board/uXjVIgV7WOM=/)
 
@@ -77,7 +76,7 @@ A full-stack, sessionless web application for optimal stock trading analysis, de
 
 - Code is pushed to GitHub.
 - GitHub Actions run lint, unit, and E2E tests.
-- On success, Render.com auto-deploys frontend, backend, healthcheck, and Alloy agent.
+- On success, Render.com auto-deploys frontend, backend, healthcheck.
 
 [View the CI/CD Workflow in Miro](https://miro.com/app/board/uXjVIgVY4fU=/)
 
@@ -90,8 +89,8 @@ A full-stack, sessionless web application for optimal stock trading analysis, de
 - E2E testing: Cypress, 5 tests.
 - Automated CI/CD with GitHub Actions: builds, tests (unit & E2E), and deploys both frontend and backend; email notifications on failed tests.
 - Automatically deployed in containers managed by Render (Docker-like).
-- Ready for horizontal scaling via Render Dashboard (manual scaling up to 3 instances, auto-scaling with Pro pack).
-- Automatic Reverse Proxy and CDN by Render: distributes static files globally, caches assets, and proxies HTTPS requests to backend.
+- Ready for horizontal scaling via Render Dashboard (manual scaling up to 3 instances or auto-scaling with Pro pack).
+- Automatic Reverse Proxy and CDN by Render: distributes static files globally, caches assets, and proxies HTTPS requests.
 - Backend health checks at `/api/health` (TerminusModule); Render monitors and restarts backend if unresponsive.
 - Swagger UI for API docs at `/api#/App/AppController_getBestTrade`.
 - HTTPS enforced for all endpoints (backend, frontend, Swagger, health checks).
@@ -175,12 +174,32 @@ npx cypress run    # for headless/CI mode
   npm run format
   ```
 
-### Alloy Agent (for metrics forwarding)
+
+---
+
+## Running Unit Tests
+
+### Backend (NestJS)
 ```sh
-cd alloy-agent
-docker build -t alloy-agent .
-docker run --env GRAFANA_CLOUD_USERNAME=... --env GRAFANA_CLOUD_PASSWORD=... alloy-agent
+cd backend
+npm run test
+npm run test:cov   # for coverage report
 ```
+- Test results and coverage summary will be shown in the terminal.
+
+### Frontend (React)
+```sh
+cd frontend
+npm test
+```
+- Press `a` to run all tests, or follow prompts for specific files.
+- Coverage report:
+```sh
+cd frontend
+npm test -- --coverage
+```
+- Coverage summary will be shown in the terminal and a detailed HTML report will be generated in `frontend/coverage/`.
+
 
 ---
 
