@@ -5,10 +5,10 @@ import argparse
 
 # Default config
 CSV_FILE = 'price_data.csv'
-DEFAULT_ROWS = 3*86400
-DEFAULT_START = '2025-07-08T00:00:00Z'
+DEFAULT_ROWS = 5*86400
+DEFAULT_START = '2025-07-10T10:00:40Z'
 DEFAULT_PRICE_MIN = 0.01
-DEFAULT_PRICE_MAX = 300.0
+DEFAULT_PRICE_MAX = 10.0
 DEFAULT_INTERVAL_SEC = 1
 
 def parse_args():
@@ -27,7 +27,7 @@ def main():
     for i in range(args.rows):
         ts = start_dt + timedelta(seconds=i * args.interval)
         #random price generation
-        #price = round(random.uniform(args.min, args.max), 2)
+        price = round(random.uniform(args.min, args.max), 2)
 
         #descending price generation
         #price = round((args.max - i/100), 2)
@@ -36,7 +36,7 @@ def main():
         #price = round((args.min + i/100), 2)
 
         #flat price generation
-        price = round(args.min, 2)
+        #price = round(args.min, 2)
 
         rows.append([ts.strftime('%Y-%m-%dT%H:%M:%SZ'), price])
     # Append to CSV
