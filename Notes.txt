@@ -120,6 +120,11 @@ Production ready DONE:
 		https://stock-backend-gvvp.onrender.com/api/metrics
 
 	Accessibility basic coverage for users with motor disabilities (use the UI with keyboard only). 
+	Documentation
+		Architecture diagram (Miro)
+		Deployment diagram (Miro)
+		Readme.md in GitHub
+		Requirements
 
 
 
@@ -129,17 +134,6 @@ Production ready TODO:
 		rate limiting (e.g., @nestjs/throttler) to prevent abuse., 
 		Monitoring - Monitor uptime, integrate with tools like Prometheus, Grafana
 	
-	Documentation
-		Provide a README explaining:
-			Project purpose
-			How to run frontend/backend
-			How to test
-			How to deploy
-		Architecture diagram (Miro)
-		Deployment diagram (Miro)
-		Deployment flow description
-		Readme.md in GitHub
-		Updload requirements
 
 
 Prod Ready Low prio and Not needed

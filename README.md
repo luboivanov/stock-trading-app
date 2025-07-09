@@ -16,6 +16,7 @@ A full-stack, sessionless web application for optimal stock trading analysis, de
 - **Architecture Diagram (Miro):** [https://miro.com/app/board/uXjVIgV7WOM=/](https://miro.com/app/board/uXjVIgV7WOM=/)
 - **CI/CD Workflow (Miro):** [https://miro.com/app/board/uXjVIgVY4fU=/](https://miro.com/app/board/uXjVIgVY4fU=/)
 - **GitHub Repository:** [https://github.com/luboivanov/stock-trading-app](https://github.com/luboivanov/stock-trading-app)
+- **Requirements PDF:** [requirements/Full stack developer - Task (English).pdf](requirements/Full%20stack%20developer%20-%20Task%20(English).pdf)
 
 ---
 
