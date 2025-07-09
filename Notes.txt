@@ -118,7 +118,9 @@ Production ready DONE:
 	Prometheus installed
 		exposes /metrics endpoint for collecting metrics performance and health, failed to visualise in Grafana (requires service worker)
 		https://stock-backend-gvvp.onrender.com/api/metrics
-
+	Rate limiting by Throttler
+		30reqs/min/IP
+		configured to trust the X-Forwarded-For header, so that we limit per real user (in case they use the UI or when behind the CDN)
 	Accessibility basic coverage for users with motor disabilities (use the UI with keyboard only). 
 	Documentation
 		Architecture diagram (Miro)
@@ -130,9 +132,10 @@ Production ready DONE:
 
 Production ready TODO:
 	Security & Observability — 
-		Add logging, library like @nestjs/terminus or Winston., Log errors and key events.
 		rate limiting (e.g., @nestjs/throttler) to prevent abuse., 
 		Monitoring - Monitor uptime, integrate with tools like Prometheus, Grafana
+	Slidedeck??
+	Grafana??
 	
 
 

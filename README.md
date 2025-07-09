@@ -101,6 +101,7 @@ A full-stack, sessionless web application for optimal stock trading analysis, de
 - Winston logger for backend events, errors, and auditing (see Render logs dashboard).
 - Prometheus metrics exposed at `/api/metrics` for performance and health monitoring.
 - Accessibility: basic keyboard-only navigation for users with motor disabilities.
+- **Rate Limiting:** The backend uses global rate limiting (30 requests/minute per IP) via NestJS Throttler. Real client IPs are respected even behind proxies/CDNs (trust proxy enabled).
 
 
 ---

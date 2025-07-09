@@ -20,6 +20,9 @@ async function bootstrap() {
   app.enableCors();
   app.setGlobalPrefix('api'); // Add global API prefix so /api/health works
 
+  // Trust proxy headers for real client IP (for rate limiting, logging, etc.)
+  app.set('trust proxy', true);
+
   // (Optional) Swagger setup
   const config = new DocumentBuilder()
     .setTitle('Stock Trade API')
