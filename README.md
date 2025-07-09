@@ -113,6 +113,7 @@ A full-stack, sessionless web application for optimal stock trading analysis, de
 - `/api/metrics` — Prometheus metrics
 - `/api/health` — Health check
 - `/api` — Swagger UI (API docs)
+- `/api-json` — OpenAPI/Swagger JSON spec
 
 **Frontend (React):**
 - Served as static files via CDN

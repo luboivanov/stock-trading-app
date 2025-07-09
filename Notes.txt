@@ -1,7 +1,7 @@
 Backend
 	c:\Projects\FullStackStockApp\backend
 	npm run start:dev
-	http://localhost:8000/api/v1/best-trade?start=2024-07-01T10:00:00Z&end=2024-07-01T12:00:00Z&funds=1000
+	http://localhost:8000/api/v1/best-trade?start=2025-07-01T10:00:00Z&end=2025-07-01T10:00:12Z&funds=1000
 	Swagger: http://localhost:8000/api#/App/AppController_getBestTrade
 	API-JSON doc: http://localhost:8000/api-json
 	Health: http://localhost:8000/health
@@ -37,14 +37,14 @@ Render.com
 	
 
 Testing:
-	no buy/sell, flat prices - 2024-07-01T10:00:20Z to 2024-07-01T10:00:25Z
-	no buy/sell, descending prices - 2024-07-01T10:00:26Z to 2024-07-01T10:00:29Z
+	no buy/sell, flat prices - 2025-07-01T10:00:20Z to 2025-07-01T10:00:25Z
+	no buy/sell, descending prices - 2025-07-01T10:00:26Z to 2025-07-01T10:00:29Z
 	typical scenario - 00 to 38, buy at 01, sell at 04
-	equal profit, earrlier deal - 2024-07-01T10:00:01Z to 2024-07-01T10:00:11Z -> to return 01 to 04
-	???equal profit, same sell date, shorter duration (later buy date) 2024-07-01T10:00:30Z to 2024-07-01T10:00:34Z
+	equal profit, earrlier deal - 2025-07-01T10:00:01Z to 2025-07-01T10:00:11Z -> to return 01 to 04
+	???equal profit, same sell date, shorter duration (later buy date) 2025-07-01T10:00:30Z to 2025-07-01T10:00:34Z
 
 test the UI:
-	2024-07-01 10:00:00 UTC
+	2025-07-01 10:00:00 UTC
 	http://localhost:3001/
 
 run BE unit tests:
