@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { APP_GUARD } from '@nestjs/core';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -46,7 +47,10 @@ describe('AppModule', () => {
     const { AppModule } = await import('./app.module');
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(APP_GUARD)
+      .useValue({ canActivate: () => true })
+      .compile();
     expect(moduleRef).toBeDefined();
     expect(moduleRef.get(AppController)).toBeInstanceOf(AppController);
     expect(moduleRef.get(AppService)).toBeInstanceOf(AppService);

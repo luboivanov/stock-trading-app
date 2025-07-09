@@ -8,12 +8,14 @@ import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 
 @Module({
   imports: [
-    ThrottlerModule.forRoot({
-      ttl: 60, // time to live in seconds
-      limit: 30, // max requests per IP per ttl
-    }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 60 seconds in milliseconds
+        limit: 30, // max requests per IP per ttl
+      },
+    ]),
     PrometheusModule.register(),
-    HealthModule
+    HealthModule,
   ], // Add ThrottlerModule, PrometheusModule and HealthModule to imports
   controllers: [AppController],
   providers: [AppService],

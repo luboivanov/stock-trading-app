@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import * as fs from 'fs';
+import * as path from 'path';
 import * as csv from 'csv-parser';
 
 function isValidDate(date: Date | null): date is Date {
@@ -16,7 +17,8 @@ export class AppService {
     try {
       const pricePoints: { timestamp: Date; price: number }[] = [];
 
-      const csvFilePath = '../price_data.csv';
+      // Use absolute path for CSV file to ensure it works in all environments
+      const csvFilePath = path.resolve(__dirname, '../../price_data.csv');
       if (!fs.existsSync(csvFilePath)) {
         throw new BadRequestException('CSV file not found');
       }
