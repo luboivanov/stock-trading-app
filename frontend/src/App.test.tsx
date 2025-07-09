@@ -7,6 +7,7 @@ import App from './App';
  * @jest-environment jsdom
  */
 
+//minor comment to check triggering of GitHUb Actions.
 // Mock react-datepicker to a simple input for test reliability
 jest.mock('react-datepicker', () => {
   // eslint-disable-next-line react/display-name
