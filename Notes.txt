@@ -12,6 +12,9 @@ Frontend
 	npm start:prod
 	http://localhost:3001/
 
+Python CSV generation
+	python generate_price_data.py --rows 100 --start 2025-07-01T12:00:00Z
+
 Github
 	https://github.com/luboivanov/stock-trading-app
 	push to the above :) 
@@ -42,6 +45,10 @@ Testing:
 	typical scenario - 00 to 38, buy at 01, sell at 04
 	equal profit, earrlier deal - 2025-07-01T10:00:01Z to 2025-07-01T10:00:11Z -> to return 01 to 04
 	???equal profit, same sell date, shorter duration (later buy date) 2025-07-01T10:00:30Z to 2025-07-01T10:00:34Z
+
+Huge Test Data Set:
+	2025-07-01T00:00:00Z to 2025-07-01T23:59:59Z -> random, between 0.01 and 100
+
 
 test the UI:
 	2025-07-01 10:00:00 UTC

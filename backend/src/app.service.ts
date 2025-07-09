@@ -23,7 +23,7 @@ export class AppService {
         throw new BadRequestException('CSV file not found');
       }
 
-      // Read and parse CSV. Memory consumption - 8Bytes for date + 8 bytes for price + overhead ~64Bytes. 1GB=17M rows, 86K sec in a day, 200days for 1GB
+      // Read and parse CSV. Expected memory consumption - 8Bytes for date + 8 bytes for price + overhead ~64Bytes. 1GB=17M rows, 86K sec in a day, 200days for 1GB
       const csvStream = fs
         .createReadStream(csvFilePath)
         .pipe(csv({ headers: ['timestamp', 'price'] }))
