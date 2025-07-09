@@ -20,7 +20,6 @@ describe('Stock Trading Profit Finder E2E', () => {
     cy.contains('Potential Profit').should('exist');
   });
 
-  /*
   it('shows error when no profitable trade is found', () => {
     cy.visit('http://localhost:3001');
     cy.get('input[placeholder="Select start time (UTC)"]').type('2025-07-01 10:00:19 UTC', { force: true });
@@ -31,10 +30,8 @@ describe('Stock Trading Profit Finder E2E', () => {
     cy.contains('Find Optimal Trade').click();
     cy.contains('No profitable trade found').should('exist');
   });
-  */
 
 
-  /*
   it('handles fractional shares correctly', () => {
     cy.visit('http://localhost:3001');
     // Select the checkbox (assuming only one, or add selector if needed)
@@ -52,7 +49,6 @@ describe('Stock Trading Profit Finder E2E', () => {
       expect(text).to.match(/337.50/);
     }); // Allow rounding
   });
-  */
 
   it('shows error when start date is before available data', () => {
     cy.visit('http://localhost:3001');
@@ -65,7 +61,6 @@ describe('Stock Trading Profit Finder E2E', () => {
     cy.contains('Start time in the request (2025-06-30T23:59:59.000Z) is earlier than the first CSV entry ').should('exist');
   });
 
-  /*
   it('shows error when end date is after available data', () => {
     cy.visit('http://localhost:3001');
     cy.get('input[placeholder="Select start time (UTC)"]').type('2025-07-01 10:00:01 UTC', { force: true });
@@ -76,7 +71,6 @@ describe('Stock Trading Profit Finder E2E', () => {
     cy.contains('Find Optimal Trade').click();
     cy.contains('End time in the request (2025-07-01T20:00:01.000Z) is later than the last CSV entry').should('exist');
   });
-  */
 
   it('shows info message if funds is empty but API returns valid result', () => {
     cy.visit('http://localhost:3001');
