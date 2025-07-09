@@ -95,19 +95,39 @@ describe('App', () => {
     expect(await screen.findByText(/Please specify both start and end times/i)).toBeInTheDocument();
   });
 
-  it('shows error if funds is not positive', async () => {
+  it('shows info message if funds is empty but API returns valid result', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        buyTime: '2025-07-05T00:00:00.000Z',
+        sellTime: '2025-07-05T00:00:02.000Z',
+        buyPrice: 100,
+        sellPrice: 120,
+      }),
+    });
     render(<App />);
-    // Fill required fields
+    await setDateInput('Select start time (UTC)', '2025-07-05T00:00:00');
+    await setDateInput('Select end time (UTC)', '2025-07-05T00:00:02');
+    // Do not enter funds
+    fireEvent.click(screen.getByRole('button', { name: /Find Optimal Trade/i }));
+    await screen.findByText(/Buy Time/i);
+    expect(screen.getByText(/Sell Time/i)).toBeInTheDocument();
+    expect(screen.getByText(/If you enter Available Funds/i)).toBeInTheDocument();
+  });
+
+  it('shows error if funds is negative or zero', async () => {
+    render(<App />);
     await setDateInput('Select start time (UTC)', '2025-07-05T00:00:00');
     await setDateInput('Select end time (UTC)', '2025-07-05T01:00:01');
     const fundsInput = screen.getByPlaceholderText(/e.g. 1000/i);
     await userEvent.clear(fundsInput);
     await userEvent.type(fundsInput, '-100');
-    // Submit the form to trigger validation
     fireEvent.click(screen.getByRole('button', { name: /Find Optimal Trade/i }));
-    // Match the exact error message
-    const errorDiv = await screen.findByText(/Available funds must be a positive number\./i);
-    expect(errorDiv).toBeInTheDocument();
+    expect(await screen.findByText(/Available funds must be a positive number\./i)).toBeInTheDocument();
+    await userEvent.clear(fundsInput);
+    await userEvent.type(fundsInput, '0');
+    fireEvent.click(screen.getByRole('button', { name: /Find Optimal Trade/i }));
+    expect(await screen.findByText(/Available funds must be a positive number\./i)).toBeInTheDocument();
   });
 
   it('shows error if start time is after end time', async () => {

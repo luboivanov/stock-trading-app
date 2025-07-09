@@ -73,4 +73,17 @@ describe('Stock Trading Profit Finder E2E', () => {
     cy.contains('End time in the request (2025-07-01T20:00:01.000Z) is later than the last CSV entry').should('exist');
   });
 
+  it('shows info message if funds is empty but API returns valid result', () => {
+    cy.visit('http://localhost:3001');
+    cy.get('input[placeholder="Select start time (UTC)"]').type('2025-07-01 10:00:00 UTC', { force: true });
+    cy.get('body').type('{esc}');
+    cy.get('input[placeholder="Select end time (UTC)"]').type('2025-07-01 10:00:18 UTC', { force: true });
+    cy.get('body').type('{esc}');
+    cy.get('input[placeholder="e.g. 1000"]').clear(); // leave funds empty
+    cy.contains('Find Optimal Trade').click();
+    cy.contains('Buy Time', { timeout: 10000 }).should('exist');
+    cy.contains('Sell Time').should('exist');
+    cy.contains('If you enter Available Funds the system will be able to calculate the potential profit for you').should('exist');
+  });
+
 });
