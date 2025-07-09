@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -25,6 +25,14 @@ const App: React.FC = () => {
     profit: number | null;
   } | null>(null);
   const [error, setError] = useState('');
+  const startPickerRef = useRef<any>(null);
+
+  useEffect(() => {
+    // Focus the start time selector on mount
+    if (startPickerRef.current && startPickerRef.current.setFocus) {
+      startPickerRef.current.setFocus();
+    }
+  }, []);
 
   //async function to handle the query and wait for the response
   //fetches data from the backend API and processes the response
@@ -35,7 +43,6 @@ const App: React.FC = () => {
   const handleQuery = async () => {
     setError('');
     setResult(null);
-    // Use the UTC string for API
     if (!startTimeStr || !endTimeStr) {
       setError('Please specify both start and end times.');
       return;
@@ -46,8 +53,8 @@ const App: React.FC = () => {
       setError('Start time must be before end time.');
       return;
     }
-    const fundsNum = parseFloat(funds);
-    if (isNaN(fundsNum) || fundsNum <= 0) {
+    let fundsNum = parseFloat(funds);
+    if (funds && (isNaN(fundsNum) || fundsNum <= 0)) {
       setError('Available funds must be a positive number.');
       return;
     }
@@ -66,23 +73,16 @@ const App: React.FC = () => {
         setError('No profitable trade found for the given time period.');
         return;
       }
-
-      const stocksBought = fractional
-        ? Math.floor((fundsNum / data.buyPrice) * 100) / 100 // round down to 2 decimals
-        : Math.floor(fundsNum / data.buyPrice);
+      let stocksBought = 0;
       let profit = null;
-      if (stocksBought === 0) {
-        setResult({
-          buyTime: data.buyTime,
-          sellTime: data.sellTime,
-          buyPrice: data.buyPrice,
-          sellPrice: data.sellPrice,
-          stocksBought: 0,
-          profit: null,
-        });
-        return;
+      if (funds) {
+        stocksBought = fractional
+          ? Math.floor((fundsNum / data.buyPrice) * 100) / 100
+          : Math.floor(fundsNum / data.buyPrice);
+        if (stocksBought > 0) {
+          profit = stocksBought * (data.sellPrice - data.buyPrice);
+        }
       }
-      profit = stocksBought * (data.sellPrice - data.buyPrice);
       setResult({
         buyTime: data.buyTime,
         sellTime: data.sellTime,
@@ -143,6 +143,7 @@ const App: React.FC = () => {
               </td>
               <td style={{ width: '100%' }}>
                 <DatePicker
+                  ref={startPickerRef}
                   selected={startTimeStr ? utcStringToLocalDate(startTimeStr) : null}
                   onChange={(date) => {
                     if (date) {
@@ -164,7 +165,6 @@ const App: React.FC = () => {
                   dateFormat="yyyy-MM-dd HH:mm:ss 'UTC'"
                   placeholderText="Select start time (UTC)"
                   popperPlacement="bottom"
-                  //value="2025-07-06 18:03:00 UTC"
                 />
               </td>
             </tr>
@@ -206,7 +206,6 @@ const App: React.FC = () => {
                   placeholderText="Select end time (UTC)"
                   minDate={startTimeStr ? utcStringToLocalDate(startTimeStr) : undefined}
                   popperPlacement="bottom"
-                  //value="2025-07-06 18:03:03 UTC"
                 />
               </td>
             </tr>
@@ -359,11 +358,16 @@ const App: React.FC = () => {
             </strong>{' '}
             at price <strong>${result.sellPrice.toFixed(2)}</strong>
           </p>
-          {result.stocksBought === 0 ? (
+          {funds === '' && (
+            <p style={{ color: '#b91c1c', fontWeight: 500, marginTop: 12 }}>
+              If you enter Available Funds the system will be able to calculate the potential profit for you
+            </p>
+          )}
+          {funds !== '' && result.stocksBought === 0 ? (
             <p style={{ color: '#b91c1c', fontWeight: 500, marginTop: 12 }}>
               Insufficient funds to buy any stocks at the buy price.
             </p>
-          ) : (
+          ) : funds !== '' ? (
             <>
               <p>
                 Stocks You can Buy:{' '}
@@ -373,7 +377,7 @@ const App: React.FC = () => {
                 Potential Profit: <strong>${result.profit?.toFixed(2) || 0}</strong>
               </p>
             </>
-          )}
+          ) : null}
         </div>
       )}
     </div>
