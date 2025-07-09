@@ -22,7 +22,7 @@ export class AppService {
       if (!fs.existsSync(csvFilePath)) {
         throw new BadRequestException('CSV file not found');
       }
-
+      //coment to trigger GitHub Actions
       // Read and parse CSV. Expected memory consumption - 8Bytes for date + 8 bytes for price + overhead ~64Bytes. 1GB=17M rows, 86K sec in a day, 200days for 1GB
       const csvStream = fs
         .createReadStream(csvFilePath)
