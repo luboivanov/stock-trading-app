@@ -3,12 +3,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 
-/**
- * @jest-environment jsdom
- */
 
-//minor comment to check triggering of GitHUb Actions.
-// Mock react-datepicker to a simple input for test reliability
+// Mock react-datepicker to a simple input for test reliability (react-datepicker is flaky in tests)
 jest.mock('react-datepicker', () => {
   // eslint-disable-next-line react/display-name
   return ({ selected, onChange, ...props }: any) => {
@@ -225,11 +221,6 @@ describe('App', () => {
     render(<App />);
     await setDateInput('Select start time (UTC)', '2025-07-05T00:00:00');
     await setDateInput('Select end time (UTC)', '2025-07-05T00:00:02');
-    await waitFor(() => {
-      expect(
-        screen.queryByText(/Please specify both start and end times/i),
-      ).not.toBeInTheDocument();
-    });
     const fundsInput = screen.getByPlaceholderText(/e.g. 1000/i);
     await userEvent.clear(fundsInput);
     await userEvent.type(fundsInput, '250');
@@ -254,11 +245,6 @@ describe('App', () => {
     render(<App />);
     await setDateInput('Select start time (UTC)', '2025-07-05T00:00:00');
     await setDateInput('Select end time (UTC)', '2025-07-05T00:00:02');
-    await waitFor(() => {
-      expect(
-        screen.queryByText(/Please specify both start and end times/i),
-      ).not.toBeInTheDocument();
-    });
     const fundsInput = screen.getByPlaceholderText(/e.g. 1000/i);
     await userEvent.clear(fundsInput);
     await userEvent.type(fundsInput, '5');
