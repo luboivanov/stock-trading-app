@@ -152,7 +152,12 @@ export class AppService {
         sellPrice: bestSellPrice ?? undefined,
       };
 
-      console.log('Trade Response:', tradeResponse);
+      // Log the request's start and end time and the response
+      console.log('[getBestTrade]', {
+        start,
+        end,
+        response: tradeResponse,
+      });
       return tradeResponse;
     } catch (error) {
       console.error('Error in getBestTrade():', error);
