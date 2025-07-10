@@ -8,7 +8,7 @@ interface ApiResponse {
   buyPrice: number | null;
   sellPrice: number | null;
 }
-//temp comment to push github actions workflow for e2e - test try 6
+
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
 const App: React.FC = () => {
@@ -43,10 +43,12 @@ const App: React.FC = () => {
   const handleQuery = async () => {
     setError('');
     setResult(null);
+
     if (!startTimeStr || !endTimeStr) {
       setError('Please specify both start and end times.');
       return;
     }
+
     const startTime = new Date(startTimeStr);
     const endTime = new Date(endTimeStr);
     if (startTime >= endTime) {
