@@ -87,7 +87,7 @@ A full-stack, sessionless web application for optimal stock trading analysis, de
 - Modern React frontend with date/time and fractional share support (bonus: fractional shares and date/time selector with seconds).
 - NestJS backend with REST API, health checks, and Prometheus metrics.
 - Unit tests: Frontend (97% coverage), Backend (93% coverage).
-- E2E testing: Cypress, 5 tests.
+- E2E testing: Cypress, 6 tests.
 - Automated CI/CD with GitHub Actions: builds, tests (unit & E2E), and deploys both frontend and backend; email notifications on failed tests.
 - Automatically deployed in containers managed by Render (Docker-like).
 - Ready for horizontal scaling via Render Dashboard (manual scaling up to 3 instances or auto-scaling with Pro pack).
