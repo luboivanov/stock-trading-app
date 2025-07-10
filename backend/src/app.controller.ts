@@ -9,7 +9,6 @@ export class AppController {
   getBestTrade(
     @Query('start') start: string,
     @Query('end') end: string,
-    //@Query('funds') funds?: string,
   ) {
     return this.appService.getBestTrade(start, end);
   }
