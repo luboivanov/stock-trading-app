@@ -13,70 +13,76 @@ function parseIsoToUtc(dateStr: string): Date {
 
 @Injectable()
 export class AppService {
+  private async parseCsv(): Promise<{ timestamp: Date; price: number }[]> {
+    const pricePoints: { timestamp: Date; price: number }[] = [];
+    const csvFilePath = path.resolve(__dirname, '../../price_data.csv');
+    if (!fs.existsSync(csvFilePath)) {
+      throw new BadRequestException('CSV file not found');
+    }
+    const csvStream = fs
+      .createReadStream(csvFilePath)
+      .pipe(csv({ headers: ['timestamp', 'price'] }))
+      .on('data', (row: { timestamp: string; price: string }) => {
+        const timestamp = new Date(row.timestamp);
+        const price = parseFloat(row.price);
+        if (isValidDate(timestamp) && !isNaN(price)) {
+          pricePoints.push({ timestamp, price });
+        } else {
+          console.warn('Skipping invalid CSV row:', row);
+        }
+      });
+    await new Promise((resolve, reject) => {
+      csvStream.on('end', resolve);
+      csvStream.on('error', reject);
+    });
+    pricePoints.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    if (pricePoints.length === 0) {
+      throw new BadRequestException('CSV file contains no valid entries.');
+    }
+    return pricePoints;
+  }
+
+  private validateApiParams(
+    start: string,
+    end: string,
+    csvStartTime: Date,
+    csvEndTime: Date,
+  ): { startTimeFromApi: Date; endTimeFromApi: Date } {
+    const startTimeFromApi = parseIsoToUtc(start);
+    const endTimeFromApi = parseIsoToUtc(end);
+    if (!isValidDate(startTimeFromApi)) {
+      throw new BadRequestException('Invalid start time provided.');
+    }
+    if (!isValidDate(endTimeFromApi)) {
+      throw new BadRequestException('Invalid end time provided.');
+    }
+    if (startTimeFromApi < csvStartTime) {
+      throw new BadRequestException(
+        `Start time in the request (${startTimeFromApi.toISOString()}) is earlier than the first CSV entry (${csvStartTime.toISOString()}).`,
+      );
+    }
+    if (endTimeFromApi > csvEndTime) {
+      throw new BadRequestException(
+        `End time in the request (${endTimeFromApi.toISOString()}) is later than the last CSV entry (${csvEndTime.toISOString()}).`,
+      );
+    }
+    if (endTimeFromApi < startTimeFromApi) {
+      throw new BadRequestException('End time is before start time.');
+    }
+    return { startTimeFromApi, endTimeFromApi };
+  }
+
   async getBestTrade(start: string, end: string) {
     try {
-      const pricePoints: { timestamp: Date; price: number }[] = [];
-
-      // Use absolute path for CSV file to ensure it works in all environments
-      const csvFilePath = path.resolve(__dirname, '../../price_data.csv');
-      if (!fs.existsSync(csvFilePath)) {
-        throw new BadRequestException('CSV file not found');
-      }
-      //coment to trigger GitHub Actions
-      // Read and parse CSV. Expected memory consumption - 8Bytes for date + 8 bytes for price + overhead ~64Bytes. 1GB=17M rows, 86K sec in a day, 200days for 1GB
-      const csvStream = fs
-        .createReadStream(csvFilePath)
-        .pipe(csv({ headers: ['timestamp', 'price'] }))
-        .on('data', (row: { timestamp: string; price: string }) => {
-          const timestamp = new Date(row.timestamp);
-          const price = parseFloat(row.price);
-          if (isValidDate(timestamp) && !isNaN(price)) {
-            pricePoints.push({ timestamp, price });
-          } else {
-            console.warn('Skipping invalid CSV row:', row);
-          }
-        });
-
-      //read the CSV and await until it is fully read before proceeding (csv-parser stream works asynchronously)
-      await new Promise((resolve, reject) => {
-        csvStream.on('end', resolve);
-        csvStream.on('error', reject);
-      });
-
-      // Sort by timestamp ascending - ensure cases where the csv is not ordered itself
-      pricePoints.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-
-      if (pricePoints.length === 0) {
-        throw new BadRequestException('CSV file contains no valid entries.');
-      }
-
-      const startTimeFromApi = parseIsoToUtc(start);
-      const endTimeFromApi = parseIsoToUtc(end);
+      const pricePoints = await this.parseCsv();
       const csvStartTime = pricePoints[0].timestamp;
       const csvEndTime = pricePoints[pricePoints.length - 1].timestamp;
-
-      if (!isValidDate(startTimeFromApi)) {
-        throw new BadRequestException('Invalid start time provided.');
-      }
-      if (!isValidDate(endTimeFromApi)) {
-        throw new BadRequestException('Invalid end time provided.');
-      }
-      if (startTimeFromApi < csvStartTime) {
-        throw new BadRequestException(
-          `Start time in the request (${startTimeFromApi.toISOString()}) is earlier than the first CSV entry (${csvStartTime.toISOString()}).`,
-        );
-      }
-      if (endTimeFromApi > csvEndTime) {
-        throw new BadRequestException(
-          `End time in the request (${endTimeFromApi.toISOString()}) is later than the last CSV entry (${csvEndTime.toISOString()}).`,
-        );
-      }
-      if (endTimeFromApi < startTimeFromApi) {
-        throw new BadRequestException('End time is before start time.');
-      }
-
-      //console.log('Start time from API:', startTimeFromApi.toISOString());
-      //console.log('Start time from CSV:', csvStartTime.toISOString());
+      const { startTimeFromApi, endTimeFromApi } = this.validateApiParams(
+        start,
+        end,
+        csvStartTime,
+        csvEndTime,
+      );
 
       // Filter the price data in the selected window
       const relevantPrices = pricePoints.filter(
