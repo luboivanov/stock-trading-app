@@ -23,7 +23,7 @@ A full-stack, sessionless web application for optimal stock trading analysis, de
 ## Project Overview (Requirements)
 
 ### Non-functional Requirements
-- The solution is production ready, with CI/CD, observability, and secure secret management.
+- The solution is production ready, with CI/CD, observability.
 
 ### Data
 - The backend stores static price history for a stock, with a price value for every second in a known period (no database required).
