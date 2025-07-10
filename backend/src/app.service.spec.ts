@@ -38,12 +38,15 @@ describe('AppService', () => {
 
   it('should throw for invalid start or end time', async () => {
     jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-    jest.spyOn(fs, 'createReadStream').mockReturnValue(mockCsvStream([]));
+    // Provide at least one valid row so date validation is reached
+    jest.spyOn(fs, 'createReadStream').mockReturnValue(
+      mockCsvStream([{ timestamp: '2025-07-05T00:00:00Z', price: '100' }]),
+    );
     await expect(service.getBestTrade('invalid', '2025-07-05T01:00:00Z')).rejects.toThrow(
-      'CSV file contains no valid entries.',
+      'Invalid start time provided.',
     );
     await expect(service.getBestTrade('2025-07-05T00:00:00Z', 'invalid')).rejects.toThrow(
-      'CSV file contains no valid entries.',
+      'Invalid end time provided.',
     );
   });
 
