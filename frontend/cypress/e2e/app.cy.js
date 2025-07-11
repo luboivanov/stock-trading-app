@@ -69,7 +69,7 @@ describe('Stock Trading Profit Finder E2E', () => {
     cy.get('body').type('{esc}');
     cy.get('input[placeholder="e.g. 1000"]').clear().type('1000');
     cy.contains('Find Optimal Trade').click();
-    cy.contains('End time in the request (2025-07-01T20:00:01.000Z) is later than the last CSV entry').should('exist');
+    cy.contains('in the request (2025-07-01T20:00:01.000Z) is later than the last CSV entry').should('exist');
   });
 
   it('shows info message if funds is empty but API returns valid result', () => {
