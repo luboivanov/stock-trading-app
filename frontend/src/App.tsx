@@ -141,7 +141,7 @@ const App: React.FC = () => {
                   whiteSpace: 'nowrap',
                 }}
               >
-                Start Time (UTC):
+                Start time (UTC):
               </td>
               <td style={{ width: '100%' }}>
                 <DatePicker
@@ -182,7 +182,7 @@ const App: React.FC = () => {
                   whiteSpace: 'nowrap',
                 }}
               >
-                End Time (UTC):
+                End time (UTC):
               </td>
               <td style={{ width: '100%' }}>
                 <DatePicker
@@ -223,7 +223,7 @@ const App: React.FC = () => {
                   whiteSpace: 'nowrap',
                 }}
               >
-                Available Funds:
+                Available funds:
               </td>
               <td style={{ width: '100%' }}>
                 <input
