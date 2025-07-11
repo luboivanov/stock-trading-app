@@ -65,7 +65,7 @@ describe('Stock Trading Profit Finder E2E', () => {
     cy.visit('http://localhost:3001');
     cy.get('input[placeholder="Select start time (UTC)"]').type('2025-07-01 10:00:01 UTC', { force: true });
     cy.get('body').type('{esc}');
-    cy.get('input[placeholder="Select end time (UTC)"]').type('2025-07-01 20:00:01 UTC', { force: true });
+    cy.get('input[placeholder="Select end time (UTC)"]').type('2025-07-06 20:00:01 UTC', { force: true });
     cy.get('body').type('{esc}');
     cy.get('input[placeholder="e.g. 1000"]').clear().type('1000');
     cy.contains('Find Optimal Trade').click();
